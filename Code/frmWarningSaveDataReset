@@ -1,0 +1,32 @@
+Private Sub ButtonSave_Click()
+
+    'Hide all worksheets in workbook except "Start" to make sure macros are enabled
+        Dim ws As Worksheet
+        Sheets("START").Visible = xlSheetVisible 'Make sure the "Start" worksheet is visible
+ 
+        'Hide all other worksheets
+        For Each ws In ThisWorkbook.Worksheets
+            If ws.Name <> "START" Then
+                ws.Visible = xlVeryHidden
+            End If
+        Next ws
+    
+    'Save Workbook
+    ActiveWorkbook.Save
+    
+    'Turn FormBG back on once macros are enabled for workbook
+    Sheets("FormBG").Visible = True
+    Sheets("START").Visible = xlVeryHidden
+    Application.ScreenUpdating = True
+    
+    'Return to program options menu
+    Unload WarningSaveDataReset
+    
+End Sub
+
+Private Sub ButtonCancel_Click()
+
+    'Return to program options menu
+    Unload WarningSaveDataReset
+
+End Sub
