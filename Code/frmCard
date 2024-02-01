@@ -1,0 +1,2231 @@
+Dim r As Long
+Dim LastRowWorkingData As Long
+Dim LastRowCopyData As Long
+Dim CurrentCard As Long
+
+'Finding userform window information to remove close button later
+    '//Find the userform's Window
+    Private Declare Function FindWindow Lib "user32" _
+        Alias "FindWindowA" ( _
+        ByVal lpClassName As String, _
+        ByVal lpWindowName As String) As Long
+
+    '//Get the current window style
+    Private Declare Function GetWindowLong Lib "user32" _
+        Alias "GetWindowLongA" ( _
+        ByVal hWnd As Long, _
+        ByVal nIndex As Long) As Long
+
+    '//Set the new window style
+    Private Declare Function SetWindowLong Lib "user32" _
+        Alias "SetWindowLongA" ( _
+        ByVal hWnd As Long, _
+        ByVal nIndex As Long, _
+        ByVal dwNewLong As Long) As Long
+
+    Const GWL_STYLE = -16
+    Const WS_SYSMENU = &H80000
+
+Private Sub UserForm_Initialize()
+
+    'Remove Close button on form (needs code above)
+    Dim hWnd As Long, lStyle As Long
+
+    If Val(Application.Version) >= 9 Then
+        hWnd = FindWindow("ThunderDFrame", Me.Caption)
+    Else
+        hWnd = FindWindow("ThunderXFrame", Me.Caption)
+    End If
+        '//Get the current window style and turn off the Close button
+        lStyle = GetWindowLong(hWnd, GWL_STYLE)
+        SetWindowLong hWnd, GWL_STYLE, (lStyle And Not WS_SYSMENU)
+
+    'Turns on worksheets that this form will need
+    Application.ScreenUpdating = False
+    Sheets("WorkingData").Visible = True
+    Sheets("Technician_Export").Visible = True
+    Sheets("ProgramStorage").Visible = True
+    
+    'Set details for appearance of form labels and other fields
+    Label1.Font.Size = 14
+    Label82.Font.Underline = True
+    Label83.Font.Underline = True
+    Label84.Font.Underline = True
+    Label85.Font.Underline = True
+    OrderNumberLabel.Font.Bold = True
+    OrderItemsLabel.Font.Bold = True
+    SeedOrder.Visible = False
+    
+    'Fill in combo boxes with necessary info
+    SearchComboBox.List = Array("PI")
+    SearchComboBox.Value = "PI"
+    
+    'Set style of form based on options form settings
+    If Sheets("ProgramStorage").Range("C34") = 1 Then
+        MultiPageRepDays.Style = 0 'Sets multipage style to tabs
+    ElseIf Sheets("ProgramStorage").Range("C34") = 2 Then
+        MultiPageRepDays.Style = 1 'Sets multipage style to buttons
+    End If
+    
+
+    'Find the last row of data in the WorkingData worksheet
+    ActiveWorkbook.Sheets("WorkingData").Activate
+    r = 2
+    
+    Do While r < 65536 And Len(Cells(r, 1).Text) > 0
+        r = r + 1
+    Loop
+    
+    LastRowWorkingData = r - 2
+    LastRowCopyData = LastRowWorkingData + 1
+    Sheets("ProgramStorage").Range("C35") = LastRowCopyData
+    
+    ActiveWorkbook.Sheets("FormBG").Activate
+    
+    'Imports data from last session's row of WorkingData worksheet into CardData form
+    
+    CurrentCard = Sheets("ProgramStorage").Range("C32")
+    RowNumber.Value = CurrentCard
+    r = RowNumber.Value + 1
+    
+    PI.Text = Sheets("WorkingData").Range("B" & r)
+    CommonName.Text = Sheets("WorkingData").Range("C" & r)
+    Taxon.Text = Sheets("WorkingData").Range("D" & r)
+    ViabilityRule.Text = Sheets("WorkingData").Range("FW" & r)
+    DateReceived.Text = Sheets("WorkingData").Range("E" & r)
+    StartDate.Text = Sheets("WorkingData").Range("F" & r)
+    CompletedDate.Text = Sheets("WorkingData").Range("G" & r)
+    SeedOrder.Text = Sheets("WorkingData").Range("H" & r)
+    Temperature.Text = Sheets("WorkingData").Range("I" & r)
+    Light.Text = Sheets("WorkingData").Range("J" & r)
+    Medium.Text = Sheets("WorkingData").Range("K" & r)
+    TotalSeedPlanted.Text = Sheets("WorkingData").Range("L" & r)
+    PlantsReturned.Text = Sheets("WorkingData").Range("FS" & r)
+    D1Date.Text = Sheets("WorkingData").Range("P" & r)
+    D1R1Normal.Text = Sheets("WorkingData").Range("V" & r)
+    D1R2Normal.Text = Sheets("WorkingData").Range("W" & r)
+    D1R3Normal.Text = Sheets("WorkingData").Range("X" & r)
+    D1R4Normal.Text = Sheets("WorkingData").Range("Y" & r)
+    D1R1Abnormal.Text = Sheets("WorkingData").Range("Z" & r)
+    D1R2Abnormal.Text = Sheets("WorkingData").Range("AA" & r)
+    D1R3Abnormal.Text = Sheets("WorkingData").Range("AB" & r)
+    D1R4Abnormal.Text = Sheets("WorkingData").Range("AC" & r)
+    D1R1DiseasedDead.Text = Sheets("WorkingData").Range("AD" & r)
+    D1R2DiseasedDead.Text = Sheets("WorkingData").Range("AE" & r)
+    D1R3DiseasedDead.Text = Sheets("WorkingData").Range("AF" & r)
+    D1R4DiseasedDead.Text = Sheets("WorkingData").Range("AG" & r)
+    D1R1Dormant.Text = Sheets("WorkingData").Range("AH" & r)
+    D1R2Dormant.Text = Sheets("WorkingData").Range("AI" & r)
+    D1R3Dormant.Text = Sheets("WorkingData").Range("AJ" & r)
+    D1R4Dormant.Text = Sheets("WorkingData").Range("AK" & r)
+    D1R1Hard.Text = Sheets("WorkingData").Range("AL" & r)
+    D1R2Hard.Text = Sheets("WorkingData").Range("AM" & r)
+    D1R3Hard.Text = Sheets("WorkingData").Range("AN" & r)
+    D1R4Hard.Text = Sheets("WorkingData").Range("AO" & r)
+    D2Date.Text = Sheets("WorkingData").Range("AP" & r)
+    D2R1Normal.Text = Sheets("WorkingData").Range("AV" & r)
+    D2R2Normal.Text = Sheets("WorkingData").Range("AW" & r)
+    D2R3Normal.Text = Sheets("WorkingData").Range("AX" & r)
+    D2R4Normal.Text = Sheets("WorkingData").Range("AY" & r)
+    D2R1Abnormal.Text = Sheets("WorkingData").Range("AZ" & r)
+    D2R2Abnormal.Text = Sheets("WorkingData").Range("BA" & r)
+    D2R3Abnormal.Text = Sheets("WorkingData").Range("BB" & r)
+    D2R4Abnormal.Text = Sheets("WorkingData").Range("BC" & r)
+    D2R1DiseasedDead.Text = Sheets("WorkingData").Range("BD" & r)
+    D2R2DiseasedDead.Text = Sheets("WorkingData").Range("BE" & r)
+    D2R3DiseasedDead.Text = Sheets("WorkingData").Range("BF" & r)
+    D2R4DiseasedDead.Text = Sheets("WorkingData").Range("BG" & r)
+    D2R1Dormant.Text = Sheets("WorkingData").Range("BH" & r)
+    D2R2Dormant.Text = Sheets("WorkingData").Range("BI" & r)
+    D2R3Dormant.Text = Sheets("WorkingData").Range("BJ" & r)
+    D2R4Dormant.Text = Sheets("WorkingData").Range("BK" & r)
+    D2R1Hard.Text = Sheets("WorkingData").Range("BL" & r)
+    D2R2Hard.Text = Sheets("WorkingData").Range("BM" & r)
+    D2R3Hard.Text = Sheets("WorkingData").Range("BN" & r)
+    D2R4Hard.Text = Sheets("WorkingData").Range("BO" & r)
+    D3Date.Text = Sheets("WorkingData").Range("BP" & r)
+    D3R1Normal.Text = Sheets("WorkingData").Range("BV" & r)
+    D3R2Normal.Text = Sheets("WorkingData").Range("BW" & r)
+    D3R3Normal.Text = Sheets("WorkingData").Range("BX" & r)
+    D3R4Normal.Text = Sheets("WorkingData").Range("BY" & r)
+    D3R1Abnormal.Text = Sheets("WorkingData").Range("BZ" & r)
+    D3R2Abnormal.Text = Sheets("WorkingData").Range("CA" & r)
+    D3R3Abnormal.Text = Sheets("WorkingData").Range("CB" & r)
+    D3R4Abnormal.Text = Sheets("WorkingData").Range("CC" & r)
+    D3R1DiseasedDead.Text = Sheets("WorkingData").Range("CD" & r)
+    D3R2DiseasedDead.Text = Sheets("WorkingData").Range("CE" & r)
+    D3R3DiseasedDead.Text = Sheets("WorkingData").Range("CF" & r)
+    D3R4DiseasedDead.Text = Sheets("WorkingData").Range("CG" & r)
+    D3R1Dormant.Text = Sheets("WorkingData").Range("CH" & r)
+    D3R2Dormant.Text = Sheets("WorkingData").Range("CI" & r)
+    D3R3Dormant.Text = Sheets("WorkingData").Range("CJ" & r)
+    D3R4Dormant.Text = Sheets("WorkingData").Range("CK" & r)
+    D3R1Hard.Text = Sheets("WorkingData").Range("CL" & r)
+    D3R2Hard.Text = Sheets("WorkingData").Range("CM" & r)
+    D3R3Hard.Text = Sheets("WorkingData").Range("CN" & r)
+    D3R4Hard.Text = Sheets("WorkingData").Range("CO" & r)
+    D4Date.Text = Sheets("WorkingData").Range("CP" & r)
+    D4R1Normal.Text = Sheets("WorkingData").Range("CV" & r)
+    D4R2Normal.Text = Sheets("WorkingData").Range("CW" & r)
+    D4R3Normal.Text = Sheets("WorkingData").Range("CX" & r)
+    D4R4Normal.Text = Sheets("WorkingData").Range("CY" & r)
+    D4R1Abnormal.Text = Sheets("WorkingData").Range("CZ" & r)
+    D4R2Abnormal.Text = Sheets("WorkingData").Range("DA" & r)
+    D4R3Abnormal.Text = Sheets("WorkingData").Range("DB" & r)
+    D4R4Abnormal.Text = Sheets("WorkingData").Range("DC" & r)
+    D4R1DiseasedDead.Text = Sheets("WorkingData").Range("DD" & r)
+    D4R2DiseasedDead.Text = Sheets("WorkingData").Range("DE" & r)
+    D4R3DiseasedDead.Text = Sheets("WorkingData").Range("DF" & r)
+    D4R4DiseasedDead.Text = Sheets("WorkingData").Range("DG" & r)
+    D4R1Dormant.Text = Sheets("WorkingData").Range("DH" & r)
+    D4R2Dormant.Text = Sheets("WorkingData").Range("DI" & r)
+    D4R3Dormant.Text = Sheets("WorkingData").Range("DJ" & r)
+    D4R4Dormant.Text = Sheets("WorkingData").Range("DK" & r)
+    D4R1Hard.Text = Sheets("WorkingData").Range("DL" & r)
+    D4R2Hard.Text = Sheets("WorkingData").Range("DM" & r)
+    D4R3Hard.Text = Sheets("WorkingData").Range("DN" & r)
+    D4R4Hard.Text = Sheets("WorkingData").Range("DO" & r)
+    D5Date.Text = Sheets("WorkingData").Range("DP" & r)
+    D5R1Normal.Text = Sheets("WorkingData").Range("DV" & r)
+    D5R2Normal.Text = Sheets("WorkingData").Range("DW" & r)
+    D5R3Normal.Text = Sheets("WorkingData").Range("DX" & r)
+    D5R4Normal.Text = Sheets("WorkingData").Range("DY" & r)
+    D5R1Abnormal.Text = Sheets("WorkingData").Range("DZ" & r)
+    D5R2Abnormal.Text = Sheets("WorkingData").Range("EA" & r)
+    D5R3Abnormal.Text = Sheets("WorkingData").Range("EB" & r)
+    D5R4Abnormal.Text = Sheets("WorkingData").Range("EC" & r)
+    D5R1DiseasedDead.Text = Sheets("WorkingData").Range("ED" & r)
+    D5R2DiseasedDead.Text = Sheets("WorkingData").Range("EE" & r)
+    D5R3DiseasedDead.Text = Sheets("WorkingData").Range("EF" & r)
+    D5R4DiseasedDead.Text = Sheets("WorkingData").Range("EG" & r)
+    D5R1Dormant.Text = Sheets("WorkingData").Range("EH" & r)
+    D5R2Dormant.Text = Sheets("WorkingData").Range("EI" & r)
+    D5R3Dormant.Text = Sheets("WorkingData").Range("EJ" & r)
+    D5R4Dormant.Text = Sheets("WorkingData").Range("EK" & r)
+    D5R1Hard.Text = Sheets("WorkingData").Range("EL" & r)
+    D5R2Hard.Text = Sheets("WorkingData").Range("EM" & r)
+    D5R3Hard.Text = Sheets("WorkingData").Range("EN" & r)
+    D5R4Hard.Text = Sheets("WorkingData").Range("EO" & r)
+    D6Date.Text = Sheets("WorkingData").Range("EP" & r)
+    D6R1Normal.Text = Sheets("WorkingData").Range("EV" & r)
+    D6R2Normal.Text = Sheets("WorkingData").Range("EW" & r)
+    D6R3Normal.Text = Sheets("WorkingData").Range("EX" & r)
+    D6R4Normal.Text = Sheets("WorkingData").Range("EY" & r)
+    D6R1Abnormal.Text = Sheets("WorkingData").Range("EZ" & r)
+    D6R2Abnormal.Text = Sheets("WorkingData").Range("FA" & r)
+    D6R3Abnormal.Text = Sheets("WorkingData").Range("FB" & r)
+    D6R4Abnormal.Text = Sheets("WorkingData").Range("FC" & r)
+    D6R1DiseasedDead.Text = Sheets("WorkingData").Range("FD" & r)
+    D6R2DiseasedDead.Text = Sheets("WorkingData").Range("FE" & r)
+    D6R3DiseasedDead.Text = Sheets("WorkingData").Range("FF" & r)
+    D6R4DiseasedDead.Text = Sheets("WorkingData").Range("FG" & r)
+    D6R1Dormant.Text = Sheets("WorkingData").Range("FH" & r)
+    D6R2Dormant.Text = Sheets("WorkingData").Range("FI" & r)
+    D6R3Dormant.Text = Sheets("WorkingData").Range("FJ" & r)
+    D6R4Dormant.Text = Sheets("WorkingData").Range("FK" & r)
+    D6R1Hard.Text = Sheets("WorkingData").Range("FL" & r)
+    D6R2Hard.Text = Sheets("WorkingData").Range("FM" & r)
+    D6R3Hard.Text = Sheets("WorkingData").Range("FN" & r)
+    D6R4Hard.Text = Sheets("WorkingData").Range("FO" & r)
+    TotalNormalSeed.Text = Sheets("WorkingData").Range("M" & r)
+    
+    'Determine if Comments field is empty and needs data from previous record
+    If Sheets("WorkingData").Range("O" & r) = "" And r > 2 Then
+        r = r - 1
+        Comments.Text = Sheets("WorkingData").Range("O" & r)
+        r = r + 1
+    Else
+        Comments.Text = Sheets("WorkingData").Range("O" & r)
+    End If
+
+    'Determine if calculated fields should be shown
+        'PercentNormalSeed field
+        If TotalSeedPlanted.Value > "0" Then
+            PercentNormalSeed.Text = Sheets("WorkingData").Range("N" & r).Value
+            Me.PercentNormalSeed.Value = Format(Me.PercentNormalSeed.Value, "0.00%")
+        Else
+            PercentNormalSeed.Text = "N/A"
+        End If
+        
+        'Duration/Day Count fields
+        If Sheets("WorkingData").Range("P" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D1DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("Q" & r) <= 0 Then
+            D1DayCount.Text = "N/A"
+        Else
+            D1DayCount.Text = Sheets("WorkingData").Range("Q" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("AP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D2DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("AQ" & r) <= 0 Then
+            D2DayCount.Text = "N/A"
+        Else
+            D2DayCount.Text = Sheets("WorkingData").Range("AQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("BP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D3DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("BQ" & r) <= 0 Then
+            D3DayCount.Text = "N/A"
+        Else
+            D3DayCount.Text = Sheets("WorkingData").Range("BQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("CP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D4DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("CQ" & r) <= 0 Then
+            D4DayCount.Text = "N/A"
+        Else
+            D4DayCount.Text = Sheets("WorkingData").Range("CQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("DP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D5DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("DQ" & r) <= 0 Then
+            D5DayCount.Text = "N/A"
+        Else
+            D5DayCount.Text = Sheets("WorkingData").Range("DQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("EP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D6DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("EQ" & r) <= 0 Then
+            D6DayCount.Text = "N/A"
+        Else
+            D6DayCount.Text = Sheets("WorkingData").Range("EQ" & r) & " days"
+        End If
+        
+        'Count Total fields
+        If Sheets("WorkingData").Range("R" & r).Value > 0 Then
+            D1R1Total.Text = Sheets("WorkingData").Range("R" & r)
+        Else
+            D1R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("S" & r).Value > 0 Then
+            D1R2Total.Text = Sheets("WorkingData").Range("S" & r)
+        Else
+            D1R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("T" & r).Value > 0 Then
+            D1R3Total.Text = Sheets("WorkingData").Range("T" & r)
+        Else
+            D1R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("U" & r).Value > 0 Then
+            D1R4Total.Text = Sheets("WorkingData").Range("U" & r)
+        Else
+            D1R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AR" & r).Value > 0 Then
+            D2R1Total.Text = Sheets("WorkingData").Range("AR" & r)
+        Else
+            D2R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AS" & r).Value > 0 Then
+            D2R2Total.Text = Sheets("WorkingData").Range("AS" & r)
+        Else
+            D2R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AT" & r).Value > 0 Then
+            D2R3Total.Text = Sheets("WorkingData").Range("AT" & r)
+        Else
+            D2R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AU" & r).Value > 0 Then
+            D2R4Total.Text = Sheets("WorkingData").Range("AU" & r)
+        Else
+            D2R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BR" & r).Value > 0 Then
+            D3R1Total.Text = Sheets("WorkingData").Range("BR" & r)
+        Else
+            D3R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BS" & r).Value > 0 Then
+            D3R2Total.Text = Sheets("WorkingData").Range("BS" & r)
+        Else
+            D3R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BT" & r).Value > 0 Then
+            D3R3Total.Text = Sheets("WorkingData").Range("BT" & r)
+        Else
+            D3R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BU" & r).Value > 0 Then
+            D3R4Total.Text = Sheets("WorkingData").Range("BU" & r)
+        Else
+            D3R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CR" & r).Value > 0 Then
+            D4R1Total.Text = Sheets("WorkingData").Range("CR" & r)
+        Else
+            D4R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CS" & r).Value > 0 Then
+            D4R2Total.Text = Sheets("WorkingData").Range("CS" & r)
+        Else
+            D4R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CT" & r).Value > 0 Then
+            D4R3Total.Text = Sheets("WorkingData").Range("CT" & r)
+        Else
+            D4R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CU" & r).Value > 0 Then
+            D4R4Total.Text = Sheets("WorkingData").Range("CU" & r)
+        Else
+            D4R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DR" & r).Value > 0 Then
+            D5R1Total.Text = Sheets("WorkingData").Range("DR" & r)
+        Else
+            D5R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DS" & r).Value > 0 Then
+            D5R2Total.Text = Sheets("WorkingData").Range("DS" & r)
+        Else
+            D5R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DT" & r).Value > 0 Then
+            D5R3Total.Text = Sheets("WorkingData").Range("DT" & r)
+        Else
+            D5R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DU" & r).Value > 0 Then
+            D5R4Total.Text = Sheets("WorkingData").Range("DU" & r)
+        Else
+            D5R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("ER" & r).Value > 0 Then
+            D6R1Total.Text = Sheets("WorkingData").Range("ER" & r)
+        Else
+            D6R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("ES" & r).Value > 0 Then
+            D6R2Total.Text = Sheets("WorkingData").Range("ES" & r)
+        Else
+            D6R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("ET" & r).Value > 0 Then
+            D6R3Total.Text = Sheets("WorkingData").Range("ET" & r)
+        Else
+            D6R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("EU" & r).Value > 0 Then
+            D6R4Total.Text = Sheets("WorkingData").Range("EU" & r)
+        Else
+            D6R4Total.Text = ""
+        End If
+    
+
+    'Set variables
+    OrderNumberLabel.Caption = "This is Seed Order #" & SeedOrder.Text
+    OrderItemsLabel.Caption = "This order has " & LastRowWorkingData & " accessions."
+    Sheets("Technician_Export").Range("C3") = LastRowWorkingData
+    
+    'Turns back off worksheets this form needed
+    Sheets("WorkingData").Visible = False
+    Sheets("Technician_Export").Visible = False
+    Sheets("ProgramStorage").Visible = False
+    Application.ScreenUpdating = True
+
+End Sub
+
+Private Sub RowNumber_Change()
+    
+    Dim RepCount As Integer
+    
+    'Check to see if user entered a valid number
+    If IsNumeric(RowNumber.Value) And RowNumber.Value >= 1 And RowNumber.Value <= LastRowWorkingData Then
+    
+        'Turns on worksheets that this procedure will need
+        Application.ScreenUpdating = False
+        Sheets("WorkingData").Visible = True
+        
+        'Saves data currently stored in form back to WorkingData worksheet
+        
+        Sheets("WorkingData").Range("B" & r) = PI.Text
+        Sheets("WorkingData").Range("C" & r) = CommonName.Text
+        Sheets("WorkingData").Range("D" & r) = Taxon.Text
+        Sheets("WorkingData").Range("FW" & r) = ViabilityRule.Text
+        Sheets("WorkingData").Range("E" & r) = DateReceived.Text
+        Sheets("WorkingData").Range("F" & r) = StartDate.Text
+        Sheets("WorkingData").Range("G" & r) = CompletedDate.Text
+        Sheets("WorkingData").Range("H" & r) = SeedOrder.Text
+        Sheets("WorkingData").Range("I" & r) = Temperature.Text
+        Sheets("WorkingData").Range("J" & r) = Light.Text
+        Sheets("WorkingData").Range("K" & r) = Medium.Text
+        Sheets("WorkingData").Range("L" & r) = TotalSeedPlanted.Text
+        Sheets("WorkingData").Range("FS" & r) = PlantsReturned.Text
+        Sheets("WorkingData").Range("O" & r) = Comments.Text
+        Sheets("WorkingData").Range("P" & r) = D1Date.Text
+        Sheets("WorkingData").Range("V" & r) = D1R1Normal.Text
+        Sheets("WorkingData").Range("W" & r) = D1R2Normal.Text
+        Sheets("WorkingData").Range("X" & r) = D1R3Normal.Text
+        Sheets("WorkingData").Range("Y" & r) = D1R4Normal.Text
+        Sheets("WorkingData").Range("Z" & r) = D1R1Abnormal.Text
+        Sheets("WorkingData").Range("AA" & r) = D1R2Abnormal.Text
+        Sheets("WorkingData").Range("AB" & r) = D1R3Abnormal.Text
+        Sheets("WorkingData").Range("AC" & r) = D1R4Abnormal.Text
+        Sheets("WorkingData").Range("AD" & r) = D1R1DiseasedDead.Text
+        Sheets("WorkingData").Range("AE" & r) = D1R2DiseasedDead.Text
+        Sheets("WorkingData").Range("AF" & r) = D1R3DiseasedDead.Text
+        Sheets("WorkingData").Range("AG" & r) = D1R4DiseasedDead.Text
+        Sheets("WorkingData").Range("AH" & r) = D1R1Dormant.Text
+        Sheets("WorkingData").Range("AI" & r) = D1R2Dormant.Text
+        Sheets("WorkingData").Range("AJ" & r) = D1R3Dormant.Text
+        Sheets("WorkingData").Range("AK" & r) = D1R4Dormant.Text
+        Sheets("WorkingData").Range("AL" & r) = D1R1Hard.Text
+        Sheets("WorkingData").Range("AM" & r) = D1R2Hard.Text
+        Sheets("WorkingData").Range("AN" & r) = D1R3Hard.Text
+        Sheets("WorkingData").Range("AO" & r) = D1R4Hard.Text
+        Sheets("WorkingData").Range("AP" & r) = D2Date.Text
+        Sheets("WorkingData").Range("AV" & r) = D2R1Normal.Text
+        Sheets("WorkingData").Range("AW" & r) = D2R2Normal.Text
+        Sheets("WorkingData").Range("AX" & r) = D2R3Normal.Text
+        Sheets("WorkingData").Range("AY" & r) = D2R4Normal.Text
+        Sheets("WorkingData").Range("AZ" & r) = D2R1Abnormal.Text
+        Sheets("WorkingData").Range("BA" & r) = D2R2Abnormal.Text
+        Sheets("WorkingData").Range("BB" & r) = D2R3Abnormal.Text
+        Sheets("WorkingData").Range("BC" & r) = D2R4Abnormal.Text
+        Sheets("WorkingData").Range("BD" & r) = D2R1DiseasedDead.Text
+        Sheets("WorkingData").Range("BE" & r) = D2R2DiseasedDead.Text
+        Sheets("WorkingData").Range("BF" & r) = D2R3DiseasedDead.Text
+        Sheets("WorkingData").Range("BG" & r) = D2R4DiseasedDead.Text
+        Sheets("WorkingData").Range("BH" & r) = D2R1Dormant.Text
+        Sheets("WorkingData").Range("BI" & r) = D2R2Dormant.Text
+        Sheets("WorkingData").Range("BJ" & r) = D2R3Dormant.Text
+        Sheets("WorkingData").Range("BK" & r) = D2R4Dormant.Text
+        Sheets("WorkingData").Range("BL" & r) = D2R1Hard.Text
+        Sheets("WorkingData").Range("BM" & r) = D2R2Hard.Text
+        Sheets("WorkingData").Range("BN" & r) = D2R3Hard.Text
+        Sheets("WorkingData").Range("BO" & r) = D2R4Hard.Text
+        Sheets("WorkingData").Range("BP" & r) = D3Date.Text
+        Sheets("WorkingData").Range("BV" & r) = D3R1Normal.Text
+        Sheets("WorkingData").Range("BW" & r) = D3R2Normal.Text
+        Sheets("WorkingData").Range("BX" & r) = D3R3Normal.Text
+        Sheets("WorkingData").Range("BY" & r) = D3R4Normal.Text
+        Sheets("WorkingData").Range("BZ" & r) = D3R1Abnormal.Text
+        Sheets("WorkingData").Range("CA" & r) = D3R2Abnormal.Text
+        Sheets("WorkingData").Range("CB" & r) = D3R3Abnormal.Text
+        Sheets("WorkingData").Range("CC" & r) = D3R4Abnormal.Text
+        Sheets("WorkingData").Range("CD" & r) = D3R1DiseasedDead.Text
+        Sheets("WorkingData").Range("CE" & r) = D3R2DiseasedDead.Text
+        Sheets("WorkingData").Range("CF" & r) = D3R3DiseasedDead.Text
+        Sheets("WorkingData").Range("CG" & r) = D3R4DiseasedDead.Text
+        Sheets("WorkingData").Range("CH" & r) = D3R1Dormant.Text
+        Sheets("WorkingData").Range("CI" & r) = D3R2Dormant.Text
+        Sheets("WorkingData").Range("CJ" & r) = D3R3Dormant.Text
+        Sheets("WorkingData").Range("CK" & r) = D3R4Dormant.Text
+        Sheets("WorkingData").Range("CL" & r) = D3R1Hard.Text
+        Sheets("WorkingData").Range("CM" & r) = D3R2Hard.Text
+        Sheets("WorkingData").Range("CN" & r) = D3R3Hard.Text
+        Sheets("WorkingData").Range("CO" & r) = D3R4Hard.Text
+        Sheets("WorkingData").Range("CP" & r) = D4Date.Text
+        Sheets("WorkingData").Range("CV" & r) = D4R1Normal.Text
+        Sheets("WorkingData").Range("CW" & r) = D4R2Normal.Text
+        Sheets("WorkingData").Range("CX" & r) = D4R3Normal.Text
+        Sheets("WorkingData").Range("CY" & r) = D4R4Normal.Text
+        Sheets("WorkingData").Range("CZ" & r) = D4R1Abnormal.Text
+        Sheets("WorkingData").Range("DA" & r) = D4R2Abnormal.Text
+        Sheets("WorkingData").Range("DB" & r) = D4R3Abnormal.Text
+        Sheets("WorkingData").Range("DC" & r) = D4R4Abnormal.Text
+        Sheets("WorkingData").Range("DD" & r) = D4R1DiseasedDead.Text
+        Sheets("WorkingData").Range("DE" & r) = D4R2DiseasedDead.Text
+        Sheets("WorkingData").Range("DF" & r) = D4R3DiseasedDead.Text
+        Sheets("WorkingData").Range("DG" & r) = D4R4DiseasedDead.Text
+        Sheets("WorkingData").Range("DH" & r) = D4R1Dormant.Text
+        Sheets("WorkingData").Range("DI" & r) = D4R2Dormant.Text
+        Sheets("WorkingData").Range("DJ" & r) = D4R3Dormant.Text
+        Sheets("WorkingData").Range("DK" & r) = D4R4Dormant.Text
+        Sheets("WorkingData").Range("DL" & r) = D4R1Hard.Text
+        Sheets("WorkingData").Range("DM" & r) = D4R2Hard.Text
+        Sheets("WorkingData").Range("DN" & r) = D4R3Hard.Text
+        Sheets("WorkingData").Range("DO" & r) = D4R4Hard.Text
+        Sheets("WorkingData").Range("DP" & r) = D5Date.Text
+        Sheets("WorkingData").Range("DV" & r) = D5R1Normal.Text
+        Sheets("WorkingData").Range("DW" & r) = D5R2Normal.Text
+        Sheets("WorkingData").Range("DX" & r) = D5R3Normal.Text
+        Sheets("WorkingData").Range("DY" & r) = D5R4Normal.Text
+        Sheets("WorkingData").Range("DZ" & r) = D5R1Abnormal.Text
+        Sheets("WorkingData").Range("EA" & r) = D5R2Abnormal.Text
+        Sheets("WorkingData").Range("EB" & r) = D5R3Abnormal.Text
+        Sheets("WorkingData").Range("EC" & r) = D5R4Abnormal.Text
+        Sheets("WorkingData").Range("ED" & r) = D5R1DiseasedDead.Text
+        Sheets("WorkingData").Range("EE" & r) = D5R2DiseasedDead.Text
+        Sheets("WorkingData").Range("EF" & r) = D5R3DiseasedDead.Text
+        Sheets("WorkingData").Range("EG" & r) = D5R4DiseasedDead.Text
+        Sheets("WorkingData").Range("EH" & r) = D5R1Dormant.Text
+        Sheets("WorkingData").Range("EI" & r) = D5R2Dormant.Text
+        Sheets("WorkingData").Range("EJ" & r) = D5R3Dormant.Text
+        Sheets("WorkingData").Range("EK" & r) = D5R4Dormant.Text
+        Sheets("WorkingData").Range("EL" & r) = D5R1Hard.Text
+        Sheets("WorkingData").Range("EM" & r) = D5R2Hard.Text
+        Sheets("WorkingData").Range("EN" & r) = D5R3Hard.Text
+        Sheets("WorkingData").Range("EO" & r) = D5R4Hard.Text
+        Sheets("WorkingData").Range("EP" & r) = D6Date.Text
+        Sheets("WorkingData").Range("EV" & r) = D6R1Normal.Text
+        Sheets("WorkingData").Range("EW" & r) = D6R2Normal.Text
+        Sheets("WorkingData").Range("EX" & r) = D6R3Normal.Text
+        Sheets("WorkingData").Range("EY" & r) = D6R4Normal.Text
+        Sheets("WorkingData").Range("EZ" & r) = D6R1Abnormal.Text
+        Sheets("WorkingData").Range("FA" & r) = D6R2Abnormal.Text
+        Sheets("WorkingData").Range("FB" & r) = D6R3Abnormal.Text
+        Sheets("WorkingData").Range("FC" & r) = D6R4Abnormal.Text
+        Sheets("WorkingData").Range("FD" & r) = D6R1DiseasedDead.Text
+        Sheets("WorkingData").Range("FE" & r) = D6R2DiseasedDead.Text
+        Sheets("WorkingData").Range("FF" & r) = D6R3DiseasedDead.Text
+        Sheets("WorkingData").Range("FG" & r) = D6R4DiseasedDead.Text
+        Sheets("WorkingData").Range("FH" & r) = D6R1Dormant.Text
+        Sheets("WorkingData").Range("FI" & r) = D6R2Dormant.Text
+        Sheets("WorkingData").Range("FJ" & r) = D6R3Dormant.Text
+        Sheets("WorkingData").Range("FK" & r) = D6R4Dormant.Text
+        Sheets("WorkingData").Range("FL" & r) = D6R1Hard.Text
+        Sheets("WorkingData").Range("FM" & r) = D6R2Hard.Text
+        Sheets("WorkingData").Range("FN" & r) = D6R3Hard.Text
+        Sheets("WorkingData").Range("FO" & r) = D6R4Hard.Text
+ 
+            'Calculates Replication Count
+            RepCount = 0
+            If Sheets("WorkingData").Range("R" & r).Value > "0" Then
+                RepCount = RepCount + 1
+            End If
+            If Sheets("WorkingData").Range("S" & r).Value > "0" Then
+                RepCount = RepCount + 1
+            End If
+            If Sheets("WorkingData").Range("T" & r).Value > "0" Then
+                RepCount = RepCount + 1
+            End If
+            If Sheets("WorkingData").Range("U" & r).Value > "0" Then
+                RepCount = RepCount + 1
+            End If
+            Sheets("WorkingData").Range("FR" & r) = RepCount
+ 
+        'Pulls matching RowNumber record to form from WorkingData worksheet
+    
+        r = RowNumber.Value + 1
+    
+        PI.Text = Sheets("WorkingData").Range("B" & r)
+    Taxon.Text = Sheets("WorkingData").Range("D" & r)
+    ViabilityRule.Text = Sheets("WorkingData").Range("FW" & r)
+    DateReceived.Text = Sheets("WorkingData").Range("E" & r)
+    StartDate.Text = Sheets("WorkingData").Range("F" & r)
+    CompletedDate.Text = Sheets("WorkingData").Range("G" & r)
+    SeedOrder.Text = Sheets("WorkingData").Range("H" & r)
+    TotalSeedPlanted.Text = Sheets("WorkingData").Range("L" & r)
+    PlantsReturned.Text = Sheets("WorkingData").Range("FS" & r)
+    D1Date.Text = Sheets("WorkingData").Range("P" & r)
+    D1R1Normal.Text = Sheets("WorkingData").Range("V" & r)
+    D1R2Normal.Text = Sheets("WorkingData").Range("W" & r)
+    D1R3Normal.Text = Sheets("WorkingData").Range("X" & r)
+    D1R4Normal.Text = Sheets("WorkingData").Range("Y" & r)
+    D1R1Abnormal.Text = Sheets("WorkingData").Range("Z" & r)
+    D1R2Abnormal.Text = Sheets("WorkingData").Range("AA" & r)
+    D1R3Abnormal.Text = Sheets("WorkingData").Range("AB" & r)
+    D1R4Abnormal.Text = Sheets("WorkingData").Range("AC" & r)
+    D1R1DiseasedDead.Text = Sheets("WorkingData").Range("AD" & r)
+    D1R2DiseasedDead.Text = Sheets("WorkingData").Range("AE" & r)
+    D1R3DiseasedDead.Text = Sheets("WorkingData").Range("AF" & r)
+    D1R4DiseasedDead.Text = Sheets("WorkingData").Range("AG" & r)
+    D1R1Dormant.Text = Sheets("WorkingData").Range("AH" & r)
+    D1R2Dormant.Text = Sheets("WorkingData").Range("AI" & r)
+    D1R3Dormant.Text = Sheets("WorkingData").Range("AJ" & r)
+    D1R4Dormant.Text = Sheets("WorkingData").Range("AK" & r)
+    D1R1Hard.Text = Sheets("WorkingData").Range("AL" & r)
+    D1R2Hard.Text = Sheets("WorkingData").Range("AM" & r)
+    D1R3Hard.Text = Sheets("WorkingData").Range("AN" & r)
+    D1R4Hard.Text = Sheets("WorkingData").Range("AO" & r)
+    D2Date.Text = Sheets("WorkingData").Range("AP" & r)
+    D2R1Normal.Text = Sheets("WorkingData").Range("AV" & r)
+    D2R2Normal.Text = Sheets("WorkingData").Range("AW" & r)
+    D2R3Normal.Text = Sheets("WorkingData").Range("AX" & r)
+    D2R4Normal.Text = Sheets("WorkingData").Range("AY" & r)
+    D2R1Abnormal.Text = Sheets("WorkingData").Range("AZ" & r)
+    D2R2Abnormal.Text = Sheets("WorkingData").Range("BA" & r)
+    D2R3Abnormal.Text = Sheets("WorkingData").Range("BB" & r)
+    D2R4Abnormal.Text = Sheets("WorkingData").Range("BC" & r)
+    D2R1DiseasedDead.Text = Sheets("WorkingData").Range("BD" & r)
+    D2R2DiseasedDead.Text = Sheets("WorkingData").Range("BE" & r)
+    D2R3DiseasedDead.Text = Sheets("WorkingData").Range("BF" & r)
+    D2R4DiseasedDead.Text = Sheets("WorkingData").Range("BG" & r)
+    D2R1Dormant.Text = Sheets("WorkingData").Range("BH" & r)
+    D2R2Dormant.Text = Sheets("WorkingData").Range("BI" & r)
+    D2R3Dormant.Text = Sheets("WorkingData").Range("BJ" & r)
+    D2R4Dormant.Text = Sheets("WorkingData").Range("BK" & r)
+    D2R1Hard.Text = Sheets("WorkingData").Range("BL" & r)
+    D2R2Hard.Text = Sheets("WorkingData").Range("BM" & r)
+    D2R3Hard.Text = Sheets("WorkingData").Range("BN" & r)
+    D2R4Hard.Text = Sheets("WorkingData").Range("BO" & r)
+    D3Date.Text = Sheets("WorkingData").Range("BP" & r)
+    D3R1Normal.Text = Sheets("WorkingData").Range("BV" & r)
+    D3R2Normal.Text = Sheets("WorkingData").Range("BW" & r)
+    D3R3Normal.Text = Sheets("WorkingData").Range("BX" & r)
+    D3R4Normal.Text = Sheets("WorkingData").Range("BY" & r)
+    D3R1Abnormal.Text = Sheets("WorkingData").Range("BZ" & r)
+    D3R2Abnormal.Text = Sheets("WorkingData").Range("CA" & r)
+    D3R3Abnormal.Text = Sheets("WorkingData").Range("CB" & r)
+    D3R4Abnormal.Text = Sheets("WorkingData").Range("CC" & r)
+    D3R1DiseasedDead.Text = Sheets("WorkingData").Range("CD" & r)
+    D3R2DiseasedDead.Text = Sheets("WorkingData").Range("CE" & r)
+    D3R3DiseasedDead.Text = Sheets("WorkingData").Range("CF" & r)
+    D3R4DiseasedDead.Text = Sheets("WorkingData").Range("CG" & r)
+    D3R1Dormant.Text = Sheets("WorkingData").Range("CH" & r)
+    D3R2Dormant.Text = Sheets("WorkingData").Range("CI" & r)
+    D3R3Dormant.Text = Sheets("WorkingData").Range("CJ" & r)
+    D3R4Dormant.Text = Sheets("WorkingData").Range("CK" & r)
+    D3R1Hard.Text = Sheets("WorkingData").Range("CL" & r)
+    D3R2Hard.Text = Sheets("WorkingData").Range("CM" & r)
+    D3R3Hard.Text = Sheets("WorkingData").Range("CN" & r)
+    D3R4Hard.Text = Sheets("WorkingData").Range("CO" & r)
+    D4Date.Text = Sheets("WorkingData").Range("CP" & r)
+    D4R1Normal.Text = Sheets("WorkingData").Range("CV" & r)
+    D4R2Normal.Text = Sheets("WorkingData").Range("CW" & r)
+    D4R3Normal.Text = Sheets("WorkingData").Range("CX" & r)
+    D4R4Normal.Text = Sheets("WorkingData").Range("CY" & r)
+    D4R1Abnormal.Text = Sheets("WorkingData").Range("CZ" & r)
+    D4R2Abnormal.Text = Sheets("WorkingData").Range("DA" & r)
+    D4R3Abnormal.Text = Sheets("WorkingData").Range("DB" & r)
+    D4R4Abnormal.Text = Sheets("WorkingData").Range("DC" & r)
+    D4R1DiseasedDead.Text = Sheets("WorkingData").Range("DD" & r)
+    D4R2DiseasedDead.Text = Sheets("WorkingData").Range("DE" & r)
+    D4R3DiseasedDead.Text = Sheets("WorkingData").Range("DF" & r)
+    D4R4DiseasedDead.Text = Sheets("WorkingData").Range("DG" & r)
+    D4R1Dormant.Text = Sheets("WorkingData").Range("DH" & r)
+    D4R2Dormant.Text = Sheets("WorkingData").Range("DI" & r)
+    D4R3Dormant.Text = Sheets("WorkingData").Range("DJ" & r)
+    D4R4Dormant.Text = Sheets("WorkingData").Range("DK" & r)
+    D4R1Hard.Text = Sheets("WorkingData").Range("DL" & r)
+    D4R2Hard.Text = Sheets("WorkingData").Range("DM" & r)
+    D4R3Hard.Text = Sheets("WorkingData").Range("DN" & r)
+    D4R4Hard.Text = Sheets("WorkingData").Range("DO" & r)
+    D5Date.Text = Sheets("WorkingData").Range("DP" & r)
+    D5R1Normal.Text = Sheets("WorkingData").Range("DV" & r)
+    D5R2Normal.Text = Sheets("WorkingData").Range("DW" & r)
+    D5R3Normal.Text = Sheets("WorkingData").Range("DX" & r)
+    D5R4Normal.Text = Sheets("WorkingData").Range("DY" & r)
+    D5R1Abnormal.Text = Sheets("WorkingData").Range("DZ" & r)
+    D5R2Abnormal.Text = Sheets("WorkingData").Range("EA" & r)
+    D5R3Abnormal.Text = Sheets("WorkingData").Range("EB" & r)
+    D5R4Abnormal.Text = Sheets("WorkingData").Range("EC" & r)
+    D5R1DiseasedDead.Text = Sheets("WorkingData").Range("ED" & r)
+    D5R2DiseasedDead.Text = Sheets("WorkingData").Range("EE" & r)
+    D5R3DiseasedDead.Text = Sheets("WorkingData").Range("EF" & r)
+    D5R4DiseasedDead.Text = Sheets("WorkingData").Range("EG" & r)
+    D5R1Dormant.Text = Sheets("WorkingData").Range("EH" & r)
+    D5R2Dormant.Text = Sheets("WorkingData").Range("EI" & r)
+    D5R3Dormant.Text = Sheets("WorkingData").Range("EJ" & r)
+    D5R4Dormant.Text = Sheets("WorkingData").Range("EK" & r)
+    D5R1Hard.Text = Sheets("WorkingData").Range("EL" & r)
+    D5R2Hard.Text = Sheets("WorkingData").Range("EM" & r)
+    D5R3Hard.Text = Sheets("WorkingData").Range("EN" & r)
+    D5R4Hard.Text = Sheets("WorkingData").Range("EO" & r)
+    D6Date.Text = Sheets("WorkingData").Range("EP" & r)
+    D6R1Normal.Text = Sheets("WorkingData").Range("EV" & r)
+    D6R2Normal.Text = Sheets("WorkingData").Range("EW" & r)
+    D6R3Normal.Text = Sheets("WorkingData").Range("EX" & r)
+    D6R4Normal.Text = Sheets("WorkingData").Range("EY" & r)
+    D6R1Abnormal.Text = Sheets("WorkingData").Range("EZ" & r)
+    D6R2Abnormal.Text = Sheets("WorkingData").Range("FA" & r)
+    D6R3Abnormal.Text = Sheets("WorkingData").Range("FB" & r)
+    D6R4Abnormal.Text = Sheets("WorkingData").Range("FC" & r)
+    D6R1DiseasedDead.Text = Sheets("WorkingData").Range("FD" & r)
+    D6R2DiseasedDead.Text = Sheets("WorkingData").Range("FE" & r)
+    D6R3DiseasedDead.Text = Sheets("WorkingData").Range("FF" & r)
+    D6R4DiseasedDead.Text = Sheets("WorkingData").Range("FG" & r)
+    D6R1Dormant.Text = Sheets("WorkingData").Range("FH" & r)
+    D6R2Dormant.Text = Sheets("WorkingData").Range("FI" & r)
+    D6R3Dormant.Text = Sheets("WorkingData").Range("FJ" & r)
+    D6R4Dormant.Text = Sheets("WorkingData").Range("FK" & r)
+    D6R1Hard.Text = Sheets("WorkingData").Range("FL" & r)
+    D6R2Hard.Text = Sheets("WorkingData").Range("FM" & r)
+    D6R3Hard.Text = Sheets("WorkingData").Range("FN" & r)
+    D6R4Hard.Text = Sheets("WorkingData").Range("FO" & r)
+    TotalNormalSeed.Text = Sheets("WorkingData").Range("M" & r)
+
+    'Determine if certain empty fields are empty and need data from previous records
+    If Sheets("WorkingData").Range("O" & r) = "" And r > 2 Then
+        r = r - 1
+        Comments.Text = Sheets("WorkingData").Range("O" & r)
+        r = r + 1
+    Else
+        Comments.Text = Sheets("WorkingData").Range("O" & r)
+    End If
+        
+    If Sheets("WorkingData").Range("C" & r) = "" And r > 2 Then
+        r = r - 1
+        CommonName.Text = Sheets("WorkingData").Range("C" & r)
+        r = r + 1
+    Else
+        CommonName.Text = Sheets("WorkingData").Range("C" & r)
+    End If
+    
+    If Sheets("WorkingData").Range("I" & r) = "" And r > 2 Then
+        r = r - 1
+        Temperature.Text = Sheets("WorkingData").Range("I" & r)
+        r = r + 1
+    Else
+        Temperature.Text = Sheets("WorkingData").Range("I" & r)
+    End If
+    
+    If Sheets("WorkingData").Range("J" & r) = "" And r > 2 Then
+        r = r - 1
+        Light.Text = Sheets("WorkingData").Range("J" & r)
+        r = r + 1
+    Else
+        Light.Text = Sheets("WorkingData").Range("J" & r)
+    End If
+    
+    If Sheets("WorkingData").Range("K" & r) = "" And r > 2 Then
+        r = r - 1
+        Medium.Text = Sheets("WorkingData").Range("K" & r)
+        r = r + 1
+    Else
+        Medium.Text = Sheets("WorkingData").Range("K" & r)
+    End If
+
+    'Determine if calculated fields should be shown
+        'PercentNormalSeed field
+        If TotalSeedPlanted.Value > "0" Then
+            PercentNormalSeed.Text = Sheets("WorkingData").Range("N" & r).Value
+            Me.PercentNormalSeed.Value = Format(Me.PercentNormalSeed.Value, "0.00%")
+        Else
+            PercentNormalSeed.Text = "N/A"
+        End If
+        
+        'Duration/Day Count fields
+        If Sheets("WorkingData").Range("P" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D1DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("Q" & r) <= 0 Then
+            D1DayCount.Text = "N/A"
+        Else
+            D1DayCount.Text = Sheets("WorkingData").Range("Q" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("AP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D2DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("AQ" & r) <= 0 Then
+            D2DayCount.Text = "N/A"
+        Else
+            D2DayCount.Text = Sheets("WorkingData").Range("AQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("BP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D3DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("BQ" & r) <= 0 Then
+            D3DayCount.Text = "N/A"
+        Else
+            D3DayCount.Text = Sheets("WorkingData").Range("BQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("CP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D4DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("CQ" & r) <= 0 Then
+            D4DayCount.Text = "N/A"
+        Else
+            D4DayCount.Text = Sheets("WorkingData").Range("CQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("DP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D5DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("DQ" & r) <= 0 Then
+            D5DayCount.Text = "N/A"
+        Else
+            D5DayCount.Text = Sheets("WorkingData").Range("DQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("EP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D6DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("EQ" & r) <= 0 Then
+            D6DayCount.Text = "N/A"
+        Else
+            D6DayCount.Text = Sheets("WorkingData").Range("EQ" & r) & " days"
+        End If
+
+        'Count Total fields
+        If Sheets("WorkingData").Range("R" & r).Value > 0 Then
+            D1R1Total.Text = Sheets("WorkingData").Range("R" & r)
+        Else
+            D1R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("S" & r).Value > 0 Then
+            D1R2Total.Text = Sheets("WorkingData").Range("S" & r)
+        Else
+            D1R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("T" & r).Value > 0 Then
+            D1R3Total.Text = Sheets("WorkingData").Range("T" & r)
+        Else
+            D1R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("U" & r).Value > 0 Then
+            D1R4Total.Text = Sheets("WorkingData").Range("U" & r)
+        Else
+            D1R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AR" & r).Value > 0 Then
+            D2R1Total.Text = Sheets("WorkingData").Range("AR" & r)
+        Else
+            D2R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AS" & r).Value > 0 Then
+            D2R2Total.Text = Sheets("WorkingData").Range("AS" & r)
+        Else
+            D2R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AT" & r).Value > 0 Then
+            D2R3Total.Text = Sheets("WorkingData").Range("AT" & r)
+        Else
+            D2R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AU" & r).Value > 0 Then
+            D2R4Total.Text = Sheets("WorkingData").Range("AU" & r)
+        Else
+            D2R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BR" & r).Value > 0 Then
+            D3R1Total.Text = Sheets("WorkingData").Range("BR" & r)
+        Else
+            D3R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BS" & r).Value > 0 Then
+            D3R2Total.Text = Sheets("WorkingData").Range("BS" & r)
+        Else
+            D3R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BT" & r).Value > 0 Then
+            D3R3Total.Text = Sheets("WorkingData").Range("BT" & r)
+        Else
+            D3R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BU" & r).Value > 0 Then
+            D3R4Total.Text = Sheets("WorkingData").Range("BU" & r)
+        Else
+            D3R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CR" & r).Value > 0 Then
+            D4R1Total.Text = Sheets("WorkingData").Range("CR" & r)
+        Else
+            D4R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CS" & r).Value > 0 Then
+            D4R2Total.Text = Sheets("WorkingData").Range("CS" & r)
+        Else
+            D4R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CT" & r).Value > 0 Then
+            D4R3Total.Text = Sheets("WorkingData").Range("CT" & r)
+        Else
+            D4R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CU" & r).Value > 0 Then
+            D4R4Total.Text = Sheets("WorkingData").Range("CU" & r)
+        Else
+            D4R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DR" & r).Value > 0 Then
+            D5R1Total.Text = Sheets("WorkingData").Range("DR" & r)
+        Else
+            D5R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DS" & r).Value > 0 Then
+            D5R2Total.Text = Sheets("WorkingData").Range("DS" & r)
+        Else
+            D5R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DT" & r).Value > 0 Then
+            D5R3Total.Text = Sheets("WorkingData").Range("DT" & r)
+        Else
+            D5R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DU" & r).Value > 0 Then
+            D5R4Total.Text = Sheets("WorkingData").Range("DU" & r)
+        Else
+            D5R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("ER" & r).Value > 0 Then
+            D6R1Total.Text = Sheets("WorkingData").Range("ER" & r)
+        Else
+            D6R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("ES" & r).Value > 0 Then
+            D6R2Total.Text = Sheets("WorkingData").Range("ES" & r)
+        Else
+            D6R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("ET" & r).Value > 0 Then
+            D6R3Total.Text = Sheets("WorkingData").Range("ET" & r)
+        Else
+            D6R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("EU" & r).Value > 0 Then
+            D6R4Total.Text = Sheets("WorkingData").Range("EU" & r)
+        Else
+            D6R4Total.Text = ""
+        End If
+        
+        CurrentCard = RowNumber.Value 'Saves user's place in cards for when they return
+        
+        'Turns back off worksheets this form needed
+        Sheets("WorkingData").Visible = False
+        Application.ScreenUpdating = True
+        
+    Else
+        
+        'Alert the user that the value is illegal and reset RowNumber to the previous value
+        MsgBox "Illegal record number. This value must be a number between 1 and " & LastRowWorkingData & "."
+        RowNumber.Value = r - 1
+    
+    End If
+
+End Sub
+
+Private Sub ButtonFirst_Click()
+
+    'Moves RowNumber value to first record in the worksheet and pulls first record data
+    RowNumber.Value = 1
+
+End Sub
+
+Private Sub ButtonLast_Click()
+ 
+    'Moves RowNumber value to last record in the worksheet and pulls last record data
+    RowNumber.Value = LastRowWorkingData
+    
+End Sub
+
+Private Sub ButtonPrevious_Click()
+
+    'Moves RowNumber value down one if a valid record exists for that row in the worksheet
+    
+    If RowNumber.Value - 1 > 1 Then
+        
+        'Imports data from next row of WorkingData worksheet into CardData form
+        RowNumber.Value = RowNumber.Value - 1
+        r = RowNumber.Value + 1
+    
+    ElseIf RowNumber.Value - 1 <= 1 Then
+        RowNumber.Value = 1
+        r = RowNumber.Value + 1
+        
+    Else
+        MsgBox "An error has occurred. Cannot move to next record in dataset."
+        
+    End If
+
+End Sub
+
+Private Sub ButtonNext_Click()
+ 
+    'Moves RowNumber value up one if a valid record exists for that row in the worksheet
+    
+    If RowNumber.Value + 1 <= LastRowWorkingData Then
+    
+        'Imports data from next row of WorkingData worksheet into CardData form
+        RowNumber.Value = RowNumber.Value + 1
+        r = RowNumber.Value + 1
+
+    ElseIf RowNumber.Value + 1 > LastRowWorkingData Then
+        RowNumber.Value = LastRowWorkingData
+        r = LastRowWorkingData + 1
+        
+    Else
+        MsgBox "An error has occurred. Cannot move to next record in dataset."
+        
+    End If
+    
+End Sub
+
+Private Sub ButtonSubmitSearch_Click()
+
+    'Find first instance in WorkingData of the value in SearchBox
+    Dim found As Range
+    
+    'Turns on worksheets that this procedure will need
+    Application.ScreenUpdating = False
+    Sheets("WorkingData").Visible = True
+    
+    'Searches for the next P.I. in WorkingData containing the searchbox value
+    If SearchComboBox.Value = "PI" Then
+        Set found = Sheets("WorkingData").Columns("B").Find(What:=SearchBox.Value, LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False)
+        If found Is Nothing Then
+            MsgBox "No results found."
+        Else
+            RowNumber.Value = found.Row - 1
+        End If
+    End If
+
+    'Turns back off worksheets this procedure needed
+    Sheets("WorkingData").Visible = False
+    Application.ScreenUpdating = True
+
+End Sub
+
+Private Sub ButtonClearSearch_Click()
+
+    'Clears value of Search textbox
+    SearchBox.Text = ""
+
+End Sub
+
+Private Sub ButtonMainMenuReturn_Click()
+
+    Dim RepCount As Integer
+    
+    'Turns on worksheets that this form will need
+    Application.ScreenUpdating = False
+    Sheets("WorkingData").Visible = True
+    Sheets("RESOURCEDATABASE_Export").Visible = True
+    Sheets("Technician_Export").Visible = True
+    Sheets("ProgramStorage").Visible = True
+    
+    'Saves data currently stored in form back to WorkingData worksheet
+ 
+    r = RowNumber.Value + 1
+    Sheets("ProgramStorage").Range("C32") = CurrentCard 'Saves user's place in cards for when they return
+ 
+        Sheets("WorkingData").Range("B" & r) = PI.Text
+        Sheets("WorkingData").Range("C" & r) = CommonName.Text
+        Sheets("WorkingData").Range("D" & r) = Taxon.Text
+        Sheets("WorkingData").Range("FW" & r) = ViabilityRule.Text
+        Sheets("WorkingData").Range("E" & r) = DateReceived.Text
+        Sheets("WorkingData").Range("F" & r) = StartDate.Text
+        Sheets("WorkingData").Range("G" & r) = CompletedDate.Text
+        Sheets("WorkingData").Range("H" & r) = SeedOrder.Text
+        Sheets("WorkingData").Range("I" & r) = Temperature.Text
+        Sheets("WorkingData").Range("J" & r) = Light.Text
+        Sheets("WorkingData").Range("K" & r) = Medium.Text
+        Sheets("WorkingData").Range("L" & r) = TotalSeedPlanted.Text
+        Sheets("WorkingData").Range("FS" & r) = PlantsReturned.Text
+        Sheets("WorkingData").Range("O" & r) = Comments.Text
+        Sheets("WorkingData").Range("P" & r) = D1Date.Text
+        Sheets("WorkingData").Range("V" & r) = D1R1Normal.Text
+        Sheets("WorkingData").Range("W" & r) = D1R2Normal.Text
+        Sheets("WorkingData").Range("X" & r) = D1R3Normal.Text
+        Sheets("WorkingData").Range("Y" & r) = D1R4Normal.Text
+        Sheets("WorkingData").Range("Z" & r) = D1R1Abnormal.Text
+        Sheets("WorkingData").Range("AA" & r) = D1R2Abnormal.Text
+        Sheets("WorkingData").Range("AB" & r) = D1R3Abnormal.Text
+        Sheets("WorkingData").Range("AC" & r) = D1R4Abnormal.Text
+        Sheets("WorkingData").Range("AD" & r) = D1R1DiseasedDead.Text
+        Sheets("WorkingData").Range("AE" & r) = D1R2DiseasedDead.Text
+        Sheets("WorkingData").Range("AF" & r) = D1R3DiseasedDead.Text
+        Sheets("WorkingData").Range("AG" & r) = D1R4DiseasedDead.Text
+        Sheets("WorkingData").Range("AH" & r) = D1R1Dormant.Text
+        Sheets("WorkingData").Range("AI" & r) = D1R2Dormant.Text
+        Sheets("WorkingData").Range("AJ" & r) = D1R3Dormant.Text
+        Sheets("WorkingData").Range("AK" & r) = D1R4Dormant.Text
+        Sheets("WorkingData").Range("AL" & r) = D1R1Hard.Text
+        Sheets("WorkingData").Range("AM" & r) = D1R2Hard.Text
+        Sheets("WorkingData").Range("AN" & r) = D1R3Hard.Text
+        Sheets("WorkingData").Range("AO" & r) = D1R4Hard.Text
+        Sheets("WorkingData").Range("AP" & r) = D2Date.Text
+        Sheets("WorkingData").Range("AV" & r) = D2R1Normal.Text
+        Sheets("WorkingData").Range("AW" & r) = D2R2Normal.Text
+        Sheets("WorkingData").Range("AX" & r) = D2R3Normal.Text
+        Sheets("WorkingData").Range("AY" & r) = D2R4Normal.Text
+        Sheets("WorkingData").Range("AZ" & r) = D2R1Abnormal.Text
+        Sheets("WorkingData").Range("BA" & r) = D2R2Abnormal.Text
+        Sheets("WorkingData").Range("BB" & r) = D2R3Abnormal.Text
+        Sheets("WorkingData").Range("BC" & r) = D2R4Abnormal.Text
+        Sheets("WorkingData").Range("BD" & r) = D2R1DiseasedDead.Text
+        Sheets("WorkingData").Range("BE" & r) = D2R2DiseasedDead.Text
+        Sheets("WorkingData").Range("BF" & r) = D2R3DiseasedDead.Text
+        Sheets("WorkingData").Range("BG" & r) = D2R4DiseasedDead.Text
+        Sheets("WorkingData").Range("BH" & r) = D2R1Dormant.Text
+        Sheets("WorkingData").Range("BI" & r) = D2R2Dormant.Text
+        Sheets("WorkingData").Range("BJ" & r) = D2R3Dormant.Text
+        Sheets("WorkingData").Range("BK" & r) = D2R4Dormant.Text
+        Sheets("WorkingData").Range("BL" & r) = D2R1Hard.Text
+        Sheets("WorkingData").Range("BM" & r) = D2R2Hard.Text
+        Sheets("WorkingData").Range("BN" & r) = D2R3Hard.Text
+        Sheets("WorkingData").Range("BO" & r) = D2R4Hard.Text
+        Sheets("WorkingData").Range("BP" & r) = D3Date.Text
+        Sheets("WorkingData").Range("BV" & r) = D3R1Normal.Text
+        Sheets("WorkingData").Range("BW" & r) = D3R2Normal.Text
+        Sheets("WorkingData").Range("BX" & r) = D3R3Normal.Text
+        Sheets("WorkingData").Range("BY" & r) = D3R4Normal.Text
+        Sheets("WorkingData").Range("BZ" & r) = D3R1Abnormal.Text
+        Sheets("WorkingData").Range("CA" & r) = D3R2Abnormal.Text
+        Sheets("WorkingData").Range("CB" & r) = D3R3Abnormal.Text
+        Sheets("WorkingData").Range("CC" & r) = D3R4Abnormal.Text
+        Sheets("WorkingData").Range("CD" & r) = D3R1DiseasedDead.Text
+        Sheets("WorkingData").Range("CE" & r) = D3R2DiseasedDead.Text
+        Sheets("WorkingData").Range("CF" & r) = D3R3DiseasedDead.Text
+        Sheets("WorkingData").Range("CG" & r) = D3R4DiseasedDead.Text
+        Sheets("WorkingData").Range("CH" & r) = D3R1Dormant.Text
+        Sheets("WorkingData").Range("CI" & r) = D3R2Dormant.Text
+        Sheets("WorkingData").Range("CJ" & r) = D3R3Dormant.Text
+        Sheets("WorkingData").Range("CK" & r) = D3R4Dormant.Text
+        Sheets("WorkingData").Range("CL" & r) = D3R1Hard.Text
+        Sheets("WorkingData").Range("CM" & r) = D3R2Hard.Text
+        Sheets("WorkingData").Range("CN" & r) = D3R3Hard.Text
+        Sheets("WorkingData").Range("CO" & r) = D3R4Hard.Text
+        Sheets("WorkingData").Range("CP" & r) = D4Date.Text
+        Sheets("WorkingData").Range("CV" & r) = D4R1Normal.Text
+        Sheets("WorkingData").Range("CW" & r) = D4R2Normal.Text
+        Sheets("WorkingData").Range("CX" & r) = D4R3Normal.Text
+        Sheets("WorkingData").Range("CY" & r) = D4R4Normal.Text
+        Sheets("WorkingData").Range("CZ" & r) = D4R1Abnormal.Text
+        Sheets("WorkingData").Range("DA" & r) = D4R2Abnormal.Text
+        Sheets("WorkingData").Range("DB" & r) = D4R3Abnormal.Text
+        Sheets("WorkingData").Range("DC" & r) = D4R4Abnormal.Text
+        Sheets("WorkingData").Range("DD" & r) = D4R1DiseasedDead.Text
+        Sheets("WorkingData").Range("DE" & r) = D4R2DiseasedDead.Text
+        Sheets("WorkingData").Range("DF" & r) = D4R3DiseasedDead.Text
+        Sheets("WorkingData").Range("DG" & r) = D4R4DiseasedDead.Text
+        Sheets("WorkingData").Range("DH" & r) = D4R1Dormant.Text
+        Sheets("WorkingData").Range("DI" & r) = D4R2Dormant.Text
+        Sheets("WorkingData").Range("DJ" & r) = D4R3Dormant.Text
+        Sheets("WorkingData").Range("DK" & r) = D4R4Dormant.Text
+        Sheets("WorkingData").Range("DL" & r) = D4R1Hard.Text
+        Sheets("WorkingData").Range("DM" & r) = D4R2Hard.Text
+        Sheets("WorkingData").Range("DN" & r) = D4R3Hard.Text
+        Sheets("WorkingData").Range("DO" & r) = D4R4Hard.Text
+        Sheets("WorkingData").Range("DP" & r) = D5Date.Text
+        Sheets("WorkingData").Range("DV" & r) = D5R1Normal.Text
+        Sheets("WorkingData").Range("DW" & r) = D5R2Normal.Text
+        Sheets("WorkingData").Range("DX" & r) = D5R3Normal.Text
+        Sheets("WorkingData").Range("DY" & r) = D5R4Normal.Text
+        Sheets("WorkingData").Range("DZ" & r) = D5R1Abnormal.Text
+        Sheets("WorkingData").Range("EA" & r) = D5R2Abnormal.Text
+        Sheets("WorkingData").Range("EB" & r) = D5R3Abnormal.Text
+        Sheets("WorkingData").Range("EC" & r) = D5R4Abnormal.Text
+        Sheets("WorkingData").Range("ED" & r) = D5R1DiseasedDead.Text
+        Sheets("WorkingData").Range("EE" & r) = D5R2DiseasedDead.Text
+        Sheets("WorkingData").Range("EF" & r) = D5R3DiseasedDead.Text
+        Sheets("WorkingData").Range("EG" & r) = D5R4DiseasedDead.Text
+        Sheets("WorkingData").Range("EH" & r) = D5R1Dormant.Text
+        Sheets("WorkingData").Range("EI" & r) = D5R2Dormant.Text
+        Sheets("WorkingData").Range("EJ" & r) = D5R3Dormant.Text
+        Sheets("WorkingData").Range("EK" & r) = D5R4Dormant.Text
+        Sheets("WorkingData").Range("EL" & r) = D5R1Hard.Text
+        Sheets("WorkingData").Range("EM" & r) = D5R2Hard.Text
+        Sheets("WorkingData").Range("EN" & r) = D5R3Hard.Text
+        Sheets("WorkingData").Range("EO" & r) = D5R4Hard.Text
+        Sheets("WorkingData").Range("EP" & r) = D6Date.Text
+        Sheets("WorkingData").Range("EV" & r) = D6R1Normal.Text
+        Sheets("WorkingData").Range("EW" & r) = D6R2Normal.Text
+        Sheets("WorkingData").Range("EX" & r) = D6R3Normal.Text
+        Sheets("WorkingData").Range("EY" & r) = D6R4Normal.Text
+        Sheets("WorkingData").Range("EZ" & r) = D6R1Abnormal.Text
+        Sheets("WorkingData").Range("FA" & r) = D6R2Abnormal.Text
+        Sheets("WorkingData").Range("FB" & r) = D6R3Abnormal.Text
+        Sheets("WorkingData").Range("FC" & r) = D6R4Abnormal.Text
+        Sheets("WorkingData").Range("FD" & r) = D6R1DiseasedDead.Text
+        Sheets("WorkingData").Range("FE" & r) = D6R2DiseasedDead.Text
+        Sheets("WorkingData").Range("FF" & r) = D6R3DiseasedDead.Text
+        Sheets("WorkingData").Range("FG" & r) = D6R4DiseasedDead.Text
+        Sheets("WorkingData").Range("FH" & r) = D6R1Dormant.Text
+        Sheets("WorkingData").Range("FI" & r) = D6R2Dormant.Text
+        Sheets("WorkingData").Range("FJ" & r) = D6R3Dormant.Text
+        Sheets("WorkingData").Range("FK" & r) = D6R4Dormant.Text
+        Sheets("WorkingData").Range("FL" & r) = D6R1Hard.Text
+        Sheets("WorkingData").Range("FM" & r) = D6R2Hard.Text
+        Sheets("WorkingData").Range("FN" & r) = D6R3Hard.Text
+        Sheets("WorkingData").Range("FO" & r) = D6R4Hard.Text
+    
+        'Calculates Replication Count
+        RepCount = 0
+        If Sheets("WorkingData").Range("R" & r).Value > "0" Then
+            RepCount = RepCount + 1
+        End If
+        If Sheets("WorkingData").Range("S" & r).Value > "0" Then
+            RepCount = RepCount + 1
+        End If
+        If Sheets("WorkingData").Range("T" & r).Value > "0" Then
+            RepCount = RepCount + 1
+        End If
+        If Sheets("WorkingData").Range("U" & r).Value > "0" Then
+            RepCount = RepCount + 1
+        End If
+        Sheets("WorkingData").Range("FR" & r) = RepCount
+    
+    'Determine if calculated fields should be shown and refresh screen
+        TotalNormalSeed.Text = Sheets("WorkingData").Range("M" & r)
+        
+        'PercentNormalSeed field
+        If TotalSeedPlanted.Value > "0" Then
+            PercentNormalSeed.Text = Sheets("WorkingData").Range("N" & r).Value
+            Me.PercentNormalSeed.Value = Format(Me.PercentNormalSeed.Value, "0.00%")
+        Else
+            PercentNormalSeed.Text = "N/A"
+        End If
+        
+        'Duration/Day Count fields
+        If Sheets("WorkingData").Range("P" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D1DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("Q" & r) <= 0 Then
+            D1DayCount.Text = "N/A"
+        Else
+            D1DayCount.Text = Sheets("WorkingData").Range("Q" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("AP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D2DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("AQ" & r) <= 0 Then
+            D2DayCount.Text = "N/A"
+        Else
+            D2DayCount.Text = Sheets("WorkingData").Range("AQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("BP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D3DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("BQ" & r) <= 0 Then
+            D3DayCount.Text = "N/A"
+        Else
+            D3DayCount.Text = Sheets("WorkingData").Range("BQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("CP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D4DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("CQ" & r) <= 0 Then
+            D4DayCount.Text = "N/A"
+        Else
+            D4DayCount.Text = Sheets("WorkingData").Range("CQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("DP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D5DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("DQ" & r) <= 0 Then
+            D5DayCount.Text = "N/A"
+        Else
+            D5DayCount.Text = Sheets("WorkingData").Range("DQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("EP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D6DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("EQ" & r) <= 0 Then
+            D6DayCount.Text = "N/A"
+        Else
+            D6DayCount.Text = Sheets("WorkingData").Range("EQ" & r) & " days"
+        End If
+
+        'Count Total fields
+        If Sheets("WorkingData").Range("R" & r).Value > 0 Then
+            D1R1Total.Text = Sheets("WorkingData").Range("R" & r)
+        Else
+            D1R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("S" & r).Value > 0 Then
+            D1R2Total.Text = Sheets("WorkingData").Range("S" & r)
+        Else
+            D1R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("T" & r).Value > 0 Then
+            D1R3Total.Text = Sheets("WorkingData").Range("T" & r)
+        Else
+            D1R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("U" & r).Value > 0 Then
+            D1R4Total.Text = Sheets("WorkingData").Range("U" & r)
+        Else
+            D1R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AR" & r).Value > 0 Then
+            D2R1Total.Text = Sheets("WorkingData").Range("AR" & r)
+        Else
+            D2R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AS" & r).Value > 0 Then
+            D2R2Total.Text = Sheets("WorkingData").Range("AS" & r)
+        Else
+            D2R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AT" & r).Value > 0 Then
+            D2R3Total.Text = Sheets("WorkingData").Range("AT" & r)
+        Else
+            D2R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AU" & r).Value > 0 Then
+            D2R4Total.Text = Sheets("WorkingData").Range("AU" & r)
+        Else
+            D2R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BR" & r).Value > 0 Then
+            D3R1Total.Text = Sheets("WorkingData").Range("BR" & r)
+        Else
+            D3R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BS" & r).Value > 0 Then
+            D3R2Total.Text = Sheets("WorkingData").Range("BS" & r)
+        Else
+            D3R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BT" & r).Value > 0 Then
+            D3R3Total.Text = Sheets("WorkingData").Range("BT" & r)
+        Else
+            D3R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BU" & r).Value > 0 Then
+            D3R4Total.Text = Sheets("WorkingData").Range("BU" & r)
+        Else
+            D3R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CR" & r).Value > 0 Then
+            D4R1Total.Text = Sheets("WorkingData").Range("CR" & r)
+        Else
+            D4R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CS" & r).Value > 0 Then
+            D4R2Total.Text = Sheets("WorkingData").Range("CS" & r)
+        Else
+            D4R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CT" & r).Value > 0 Then
+            D4R3Total.Text = Sheets("WorkingData").Range("CT" & r)
+        Else
+            D4R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CU" & r).Value > 0 Then
+            D4R4Total.Text = Sheets("WorkingData").Range("CU" & r)
+        Else
+            D4R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DR" & r).Value > 0 Then
+            D5R1Total.Text = Sheets("WorkingData").Range("DR" & r)
+        Else
+            D5R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DS" & r).Value > 0 Then
+            D5R2Total.Text = Sheets("WorkingData").Range("DS" & r)
+        Else
+            D5R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DT" & r).Value > 0 Then
+            D5R3Total.Text = Sheets("WorkingData").Range("DT" & r)
+        Else
+            D5R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DU" & r).Value > 0 Then
+            D5R4Total.Text = Sheets("WorkingData").Range("DU" & r)
+        Else
+            D5R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("ER" & r).Value > 0 Then
+            D6R1Total.Text = Sheets("WorkingData").Range("ER" & r)
+        Else
+            D6R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("ES" & r).Value > 0 Then
+            D6R2Total.Text = Sheets("WorkingData").Range("ES" & r)
+        Else
+            D6R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("ET" & r).Value > 0 Then
+            D6R3Total.Text = Sheets("WorkingData").Range("ET" & r)
+        Else
+            D6R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("EU" & r).Value > 0 Then
+            D6R4Total.Text = Sheets("WorkingData").Range("EU" & r)
+        Else
+            D6R4Total.Text = ""
+        End If
+    
+    'Makes certain export functions can now be accessed
+    If Sheets("RESOURCEDATABASE_Export").Range("B2") = "" Then
+        Sheets("RESOURCEDATABASE_Export").Range("B2") = 1
+    End If
+    If Sheets("Technician_Export").Range("B6") = "" Then
+        Sheets("Technician_Export").Range("B6") = 1
+    End If
+    
+    'Turns back off worksheets this form needed
+    Sheets("WorkingData").Visible = False
+    Sheets("RESOURCEDATABASE_Export").Visible = False
+    Sheets("Technician_Export").Visible = False
+    Sheets("ProgramStorage").Visible = False
+    Application.ScreenUpdating = True
+    
+    'Change form display to Main Menu
+    Unload Card
+    MainMenu.Show
+
+End Sub
+
+Private Sub ButtonSaveContinue_Click()
+
+    Dim RepCount As Integer
+    
+    'Turns on worksheets that this form will need
+    Application.ScreenUpdating = False
+    Sheets("WorkingData").Visible = True
+    Sheets("RESOURCEDATABASE_Export").Visible = True
+    Sheets("Technician_Export").Visible = True
+    Sheets("ProgramStorage").Visible = True
+    
+    'Saves data currently stored in form back to WorkingData worksheet
+ 
+    r = RowNumber.Value + 1
+    Sheets("ProgramStorage").Range("C32") = CurrentCard 'Saves user's place in cards for when they return
+ 
+        Sheets("WorkingData").Range("B" & r) = PI.Text
+        Sheets("WorkingData").Range("C" & r) = CommonName.Text
+        Sheets("WorkingData").Range("D" & r) = Taxon.Text
+        Sheets("WorkingData").Range("FW" & r) = ViabilityRule.Text
+        Sheets("WorkingData").Range("E" & r) = DateReceived.Text
+        Sheets("WorkingData").Range("F" & r) = StartDate.Text
+        Sheets("WorkingData").Range("G" & r) = CompletedDate.Text
+        Sheets("WorkingData").Range("H" & r) = SeedOrder.Text
+        Sheets("WorkingData").Range("I" & r) = Temperature.Text
+        Sheets("WorkingData").Range("J" & r) = Light.Text
+        Sheets("WorkingData").Range("K" & r) = Medium.Text
+        Sheets("WorkingData").Range("L" & r) = TotalSeedPlanted.Text
+        Sheets("WorkingData").Range("FS" & r) = PlantsReturned.Text
+        Sheets("WorkingData").Range("O" & r) = Comments.Text
+        Sheets("WorkingData").Range("P" & r) = D1Date.Text
+        Sheets("WorkingData").Range("V" & r) = D1R1Normal.Text
+        Sheets("WorkingData").Range("W" & r) = D1R2Normal.Text
+        Sheets("WorkingData").Range("X" & r) = D1R3Normal.Text
+        Sheets("WorkingData").Range("Y" & r) = D1R4Normal.Text
+        Sheets("WorkingData").Range("Z" & r) = D1R1Abnormal.Text
+        Sheets("WorkingData").Range("AA" & r) = D1R2Abnormal.Text
+        Sheets("WorkingData").Range("AB" & r) = D1R3Abnormal.Text
+        Sheets("WorkingData").Range("AC" & r) = D1R4Abnormal.Text
+        Sheets("WorkingData").Range("AD" & r) = D1R1DiseasedDead.Text
+        Sheets("WorkingData").Range("AE" & r) = D1R2DiseasedDead.Text
+        Sheets("WorkingData").Range("AF" & r) = D1R3DiseasedDead.Text
+        Sheets("WorkingData").Range("AG" & r) = D1R4DiseasedDead.Text
+        Sheets("WorkingData").Range("AH" & r) = D1R1Dormant.Text
+        Sheets("WorkingData").Range("AI" & r) = D1R2Dormant.Text
+        Sheets("WorkingData").Range("AJ" & r) = D1R3Dormant.Text
+        Sheets("WorkingData").Range("AK" & r) = D1R4Dormant.Text
+        Sheets("WorkingData").Range("AL" & r) = D1R1Hard.Text
+        Sheets("WorkingData").Range("AM" & r) = D1R2Hard.Text
+        Sheets("WorkingData").Range("AN" & r) = D1R3Hard.Text
+        Sheets("WorkingData").Range("AO" & r) = D1R4Hard.Text
+        Sheets("WorkingData").Range("AP" & r) = D2Date.Text
+        Sheets("WorkingData").Range("AV" & r) = D2R1Normal.Text
+        Sheets("WorkingData").Range("AW" & r) = D2R2Normal.Text
+        Sheets("WorkingData").Range("AX" & r) = D2R3Normal.Text
+        Sheets("WorkingData").Range("AY" & r) = D2R4Normal.Text
+        Sheets("WorkingData").Range("AZ" & r) = D2R1Abnormal.Text
+        Sheets("WorkingData").Range("BA" & r) = D2R2Abnormal.Text
+        Sheets("WorkingData").Range("BB" & r) = D2R3Abnormal.Text
+        Sheets("WorkingData").Range("BC" & r) = D2R4Abnormal.Text
+        Sheets("WorkingData").Range("BD" & r) = D2R1DiseasedDead.Text
+        Sheets("WorkingData").Range("BE" & r) = D2R2DiseasedDead.Text
+        Sheets("WorkingData").Range("BF" & r) = D2R3DiseasedDead.Text
+        Sheets("WorkingData").Range("BG" & r) = D2R4DiseasedDead.Text
+        Sheets("WorkingData").Range("BH" & r) = D2R1Dormant.Text
+        Sheets("WorkingData").Range("BI" & r) = D2R2Dormant.Text
+        Sheets("WorkingData").Range("BJ" & r) = D2R3Dormant.Text
+        Sheets("WorkingData").Range("BK" & r) = D2R4Dormant.Text
+        Sheets("WorkingData").Range("BL" & r) = D2R1Hard.Text
+        Sheets("WorkingData").Range("BM" & r) = D2R2Hard.Text
+        Sheets("WorkingData").Range("BN" & r) = D2R3Hard.Text
+        Sheets("WorkingData").Range("BO" & r) = D2R4Hard.Text
+        Sheets("WorkingData").Range("BP" & r) = D3Date.Text
+        Sheets("WorkingData").Range("BV" & r) = D3R1Normal.Text
+        Sheets("WorkingData").Range("BW" & r) = D3R2Normal.Text
+        Sheets("WorkingData").Range("BX" & r) = D3R3Normal.Text
+        Sheets("WorkingData").Range("BY" & r) = D3R4Normal.Text
+        Sheets("WorkingData").Range("BZ" & r) = D3R1Abnormal.Text
+        Sheets("WorkingData").Range("CA" & r) = D3R2Abnormal.Text
+        Sheets("WorkingData").Range("CB" & r) = D3R3Abnormal.Text
+        Sheets("WorkingData").Range("CC" & r) = D3R4Abnormal.Text
+        Sheets("WorkingData").Range("CD" & r) = D3R1DiseasedDead.Text
+        Sheets("WorkingData").Range("CE" & r) = D3R2DiseasedDead.Text
+        Sheets("WorkingData").Range("CF" & r) = D3R3DiseasedDead.Text
+        Sheets("WorkingData").Range("CG" & r) = D3R4DiseasedDead.Text
+        Sheets("WorkingData").Range("CH" & r) = D3R1Dormant.Text
+        Sheets("WorkingData").Range("CI" & r) = D3R2Dormant.Text
+        Sheets("WorkingData").Range("CJ" & r) = D3R3Dormant.Text
+        Sheets("WorkingData").Range("CK" & r) = D3R4Dormant.Text
+        Sheets("WorkingData").Range("CL" & r) = D3R1Hard.Text
+        Sheets("WorkingData").Range("CM" & r) = D3R2Hard.Text
+        Sheets("WorkingData").Range("CN" & r) = D3R3Hard.Text
+        Sheets("WorkingData").Range("CO" & r) = D3R4Hard.Text
+        Sheets("WorkingData").Range("CP" & r) = D4Date.Text
+        Sheets("WorkingData").Range("CV" & r) = D4R1Normal.Text
+        Sheets("WorkingData").Range("CW" & r) = D4R2Normal.Text
+        Sheets("WorkingData").Range("CX" & r) = D4R3Normal.Text
+        Sheets("WorkingData").Range("CY" & r) = D4R4Normal.Text
+        Sheets("WorkingData").Range("CZ" & r) = D4R1Abnormal.Text
+        Sheets("WorkingData").Range("DA" & r) = D4R2Abnormal.Text
+        Sheets("WorkingData").Range("DB" & r) = D4R3Abnormal.Text
+        Sheets("WorkingData").Range("DC" & r) = D4R4Abnormal.Text
+        Sheets("WorkingData").Range("DD" & r) = D4R1DiseasedDead.Text
+        Sheets("WorkingData").Range("DE" & r) = D4R2DiseasedDead.Text
+        Sheets("WorkingData").Range("DF" & r) = D4R3DiseasedDead.Text
+        Sheets("WorkingData").Range("DG" & r) = D4R4DiseasedDead.Text
+        Sheets("WorkingData").Range("DH" & r) = D4R1Dormant.Text
+        Sheets("WorkingData").Range("DI" & r) = D4R2Dormant.Text
+        Sheets("WorkingData").Range("DJ" & r) = D4R3Dormant.Text
+        Sheets("WorkingData").Range("DK" & r) = D4R4Dormant.Text
+        Sheets("WorkingData").Range("DL" & r) = D4R1Hard.Text
+        Sheets("WorkingData").Range("DM" & r) = D4R2Hard.Text
+        Sheets("WorkingData").Range("DN" & r) = D4R3Hard.Text
+        Sheets("WorkingData").Range("DO" & r) = D4R4Hard.Text
+        Sheets("WorkingData").Range("DP" & r) = D5Date.Text
+        Sheets("WorkingData").Range("DV" & r) = D5R1Normal.Text
+        Sheets("WorkingData").Range("DW" & r) = D5R2Normal.Text
+        Sheets("WorkingData").Range("DX" & r) = D5R3Normal.Text
+        Sheets("WorkingData").Range("DY" & r) = D5R4Normal.Text
+        Sheets("WorkingData").Range("DZ" & r) = D5R1Abnormal.Text
+        Sheets("WorkingData").Range("EA" & r) = D5R2Abnormal.Text
+        Sheets("WorkingData").Range("EB" & r) = D5R3Abnormal.Text
+        Sheets("WorkingData").Range("EC" & r) = D5R4Abnormal.Text
+        Sheets("WorkingData").Range("ED" & r) = D5R1DiseasedDead.Text
+        Sheets("WorkingData").Range("EE" & r) = D5R2DiseasedDead.Text
+        Sheets("WorkingData").Range("EF" & r) = D5R3DiseasedDead.Text
+        Sheets("WorkingData").Range("EG" & r) = D5R4DiseasedDead.Text
+        Sheets("WorkingData").Range("EH" & r) = D5R1Dormant.Text
+        Sheets("WorkingData").Range("EI" & r) = D5R2Dormant.Text
+        Sheets("WorkingData").Range("EJ" & r) = D5R3Dormant.Text
+        Sheets("WorkingData").Range("EK" & r) = D5R4Dormant.Text
+        Sheets("WorkingData").Range("EL" & r) = D5R1Hard.Text
+        Sheets("WorkingData").Range("EM" & r) = D5R2Hard.Text
+        Sheets("WorkingData").Range("EN" & r) = D5R3Hard.Text
+        Sheets("WorkingData").Range("EO" & r) = D5R4Hard.Text
+        Sheets("WorkingData").Range("EP" & r) = D6Date.Text
+        Sheets("WorkingData").Range("EV" & r) = D6R1Normal.Text
+        Sheets("WorkingData").Range("EW" & r) = D6R2Normal.Text
+        Sheets("WorkingData").Range("EX" & r) = D6R3Normal.Text
+        Sheets("WorkingData").Range("EY" & r) = D6R4Normal.Text
+        Sheets("WorkingData").Range("EZ" & r) = D6R1Abnormal.Text
+        Sheets("WorkingData").Range("FA" & r) = D6R2Abnormal.Text
+        Sheets("WorkingData").Range("FB" & r) = D6R3Abnormal.Text
+        Sheets("WorkingData").Range("FC" & r) = D6R4Abnormal.Text
+        Sheets("WorkingData").Range("FD" & r) = D6R1DiseasedDead.Text
+        Sheets("WorkingData").Range("FE" & r) = D6R2DiseasedDead.Text
+        Sheets("WorkingData").Range("FF" & r) = D6R3DiseasedDead.Text
+        Sheets("WorkingData").Range("FG" & r) = D6R4DiseasedDead.Text
+        Sheets("WorkingData").Range("FH" & r) = D6R1Dormant.Text
+        Sheets("WorkingData").Range("FI" & r) = D6R2Dormant.Text
+        Sheets("WorkingData").Range("FJ" & r) = D6R3Dormant.Text
+        Sheets("WorkingData").Range("FK" & r) = D6R4Dormant.Text
+        Sheets("WorkingData").Range("FL" & r) = D6R1Hard.Text
+        Sheets("WorkingData").Range("FM" & r) = D6R2Hard.Text
+        Sheets("WorkingData").Range("FN" & r) = D6R3Hard.Text
+        Sheets("WorkingData").Range("FO" & r) = D6R4Hard.Text
+    
+        'Calculates Replication Count
+        RepCount = 0
+        If Sheets("WorkingData").Range("R" & r).Value > "0" Then
+            RepCount = RepCount + 1
+        End If
+        If Sheets("WorkingData").Range("S" & r).Value > "0" Then
+            RepCount = RepCount + 1
+        End If
+        If Sheets("WorkingData").Range("T" & r).Value > "0" Then
+            RepCount = RepCount + 1
+        End If
+        If Sheets("WorkingData").Range("U" & r).Value > "0" Then
+            RepCount = RepCount + 1
+        End If
+        Sheets("WorkingData").Range("FR" & r) = RepCount
+    
+    'Determine if calculated fields should be shown and refresh screen
+        TotalNormalSeed.Text = Sheets("WorkingData").Range("M" & r)
+        
+        'PercentNormalSeed field
+        If TotalSeedPlanted.Value > "0" Then
+            PercentNormalSeed.Text = Sheets("WorkingData").Range("N" & r).Value
+            Me.PercentNormalSeed.Value = Format(Me.PercentNormalSeed.Value, "0.00%")
+        Else
+            PercentNormalSeed.Text = "N/A"
+        End If
+        
+        'Duration/Day Count fields
+        If Sheets("WorkingData").Range("P" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D1DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("Q" & r) <= 0 Then
+            D1DayCount.Text = "N/A"
+        Else
+            D1DayCount.Text = Sheets("WorkingData").Range("Q" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("AP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D2DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("AQ" & r) <= 0 Then
+            D2DayCount.Text = "N/A"
+        Else
+            D2DayCount.Text = Sheets("WorkingData").Range("AQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("BP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D3DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("BQ" & r) <= 0 Then
+            D3DayCount.Text = "N/A"
+        Else
+            D3DayCount.Text = Sheets("WorkingData").Range("BQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("CP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D4DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("CQ" & r) <= 0 Then
+            D4DayCount.Text = "N/A"
+        Else
+            D4DayCount.Text = Sheets("WorkingData").Range("CQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("DP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D5DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("DQ" & r) <= 0 Then
+            D5DayCount.Text = "N/A"
+        Else
+            D5DayCount.Text = Sheets("WorkingData").Range("DQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("EP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D6DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("EQ" & r) <= 0 Then
+            D6DayCount.Text = "N/A"
+        Else
+            D6DayCount.Text = Sheets("WorkingData").Range("EQ" & r) & " days"
+        End If
+
+        'Count Total fields
+        If Sheets("WorkingData").Range("R" & r).Value > 0 Then
+            D1R1Total.Text = Sheets("WorkingData").Range("R" & r)
+        Else
+            D1R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("S" & r).Value > 0 Then
+            D1R2Total.Text = Sheets("WorkingData").Range("S" & r)
+        Else
+            D1R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("T" & r).Value > 0 Then
+            D1R3Total.Text = Sheets("WorkingData").Range("T" & r)
+        Else
+            D1R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("U" & r).Value > 0 Then
+            D1R4Total.Text = Sheets("WorkingData").Range("U" & r)
+        Else
+            D1R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AR" & r).Value > 0 Then
+            D2R1Total.Text = Sheets("WorkingData").Range("AR" & r)
+        Else
+            D2R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AS" & r).Value > 0 Then
+            D2R2Total.Text = Sheets("WorkingData").Range("AS" & r)
+        Else
+            D2R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AT" & r).Value > 0 Then
+            D2R3Total.Text = Sheets("WorkingData").Range("AT" & r)
+        Else
+            D2R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AU" & r).Value > 0 Then
+            D2R4Total.Text = Sheets("WorkingData").Range("AU" & r)
+        Else
+            D2R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BR" & r).Value > 0 Then
+            D3R1Total.Text = Sheets("WorkingData").Range("BR" & r)
+        Else
+            D3R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BS" & r).Value > 0 Then
+            D3R2Total.Text = Sheets("WorkingData").Range("BS" & r)
+        Else
+            D3R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BT" & r).Value > 0 Then
+            D3R3Total.Text = Sheets("WorkingData").Range("BT" & r)
+        Else
+            D3R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BU" & r).Value > 0 Then
+            D3R4Total.Text = Sheets("WorkingData").Range("BU" & r)
+        Else
+            D3R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CR" & r).Value > 0 Then
+            D4R1Total.Text = Sheets("WorkingData").Range("CR" & r)
+        Else
+            D4R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CS" & r).Value > 0 Then
+            D4R2Total.Text = Sheets("WorkingData").Range("CS" & r)
+        Else
+            D4R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CT" & r).Value > 0 Then
+            D4R3Total.Text = Sheets("WorkingData").Range("CT" & r)
+        Else
+            D4R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CU" & r).Value > 0 Then
+            D4R4Total.Text = Sheets("WorkingData").Range("CU" & r)
+        Else
+            D4R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DR" & r).Value > 0 Then
+            D5R1Total.Text = Sheets("WorkingData").Range("DR" & r)
+        Else
+            D5R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DS" & r).Value > 0 Then
+            D5R2Total.Text = Sheets("WorkingData").Range("DS" & r)
+        Else
+            D5R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DT" & r).Value > 0 Then
+            D5R3Total.Text = Sheets("WorkingData").Range("DT" & r)
+        Else
+            D5R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DU" & r).Value > 0 Then
+            D5R4Total.Text = Sheets("WorkingData").Range("DU" & r)
+        Else
+            D5R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("ER" & r).Value > 0 Then
+            D6R1Total.Text = Sheets("WorkingData").Range("ER" & r)
+        Else
+            D6R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("ES" & r).Value > 0 Then
+            D6R2Total.Text = Sheets("WorkingData").Range("ES" & r)
+        Else
+            D6R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("ET" & r).Value > 0 Then
+            D6R3Total.Text = Sheets("WorkingData").Range("ET" & r)
+        Else
+            D6R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("EU" & r).Value > 0 Then
+            D6R4Total.Text = Sheets("WorkingData").Range("EU" & r)
+        Else
+            D6R4Total.Text = ""
+        End If
+    
+    'Makes certain export functions available
+    If Sheets("RESOURCEDATABASE_Export").Range("B2") = "" Then
+        Sheets("RESOURCEDATABASE_Export").Range("B2") = 1
+    End If
+    If Sheets("Technician_Export").Range("B6") = "" Then
+        Sheets("Technician_Export").Range("B6") = 1
+    End If
+    
+    'Turns back off worksheets this form needed
+    Sheets("WorkingData").Visible = False
+    Sheets("RESOURCEDATABASE_Export").Visible = False
+    Sheets("Technician_Export").Visible = False
+    Sheets("ProgramStorage").Visible = False
+    Application.ScreenUpdating = True
+    
+    'Saves Workbook and alerts the user all operations were successful
+        'Hide all worksheets in workbook except "Start" to make sure macros are enabled
+        Dim ws As Worksheet
+        Sheets("START").Visible = xlSheetVisible 'Make sure the "Start" worksheet is visible
+ 
+        'Hide all other worksheets
+        For Each ws In ThisWorkbook.Worksheets
+            If ws.Name <> "START" Then
+                ws.Visible = xlVeryHidden
+            End If
+        Next ws
+    
+        'Save Workbook
+        ActiveWorkbook.Save
+    
+        'Turn FormBG back on once macros are enabled for workbook
+        Sheets("FormBG").Visible = True
+        Sheets("START").Visible = xlVeryHidden
+        Application.ScreenUpdating = True
+
+End Sub
+
+Private Sub ButtonSaveClose_Click()
+
+    Dim RepCount As Integer
+    
+    'Turns on worksheets that this form will need
+    Application.ScreenUpdating = False
+    Sheets("WorkingData").Visible = True
+    Sheets("RESOURCEDATABASE_Export").Visible = True
+    Sheets("Technician_Export").Visible = True
+    Sheets("ProgramStorage").Visible = True
+    
+    'Saves data currently stored in form back to WorkingData worksheet
+ 
+    r = RowNumber.Value + 1
+    Sheets("ProgramStorage").Range("C32") = CurrentCard 'Saves user's place in cards for when they return
+ 
+        Sheets("WorkingData").Range("B" & r) = PI.Text
+        Sheets("WorkingData").Range("C" & r) = CommonName.Text
+        Sheets("WorkingData").Range("D" & r) = Taxon.Text
+        Sheets("WorkingData").Range("FW" & r) = ViabilityRule.Text
+        Sheets("WorkingData").Range("E" & r) = DateReceived.Text
+        Sheets("WorkingData").Range("F" & r) = StartDate.Text
+        Sheets("WorkingData").Range("G" & r) = CompletedDate.Text
+        Sheets("WorkingData").Range("H" & r) = SeedOrder.Text
+        Sheets("WorkingData").Range("I" & r) = Temperature.Text
+        Sheets("WorkingData").Range("J" & r) = Light.Text
+        Sheets("WorkingData").Range("K" & r) = Medium.Text
+        Sheets("WorkingData").Range("L" & r) = TotalSeedPlanted.Text
+        Sheets("WorkingData").Range("FS" & r) = PlantsReturned.Text
+        Sheets("WorkingData").Range("O" & r) = Comments.Text
+        Sheets("WorkingData").Range("P" & r) = D1Date.Text
+        Sheets("WorkingData").Range("V" & r) = D1R1Normal.Text
+        Sheets("WorkingData").Range("W" & r) = D1R2Normal.Text
+        Sheets("WorkingData").Range("X" & r) = D1R3Normal.Text
+        Sheets("WorkingData").Range("Y" & r) = D1R4Normal.Text
+        Sheets("WorkingData").Range("Z" & r) = D1R1Abnormal.Text
+        Sheets("WorkingData").Range("AA" & r) = D1R2Abnormal.Text
+        Sheets("WorkingData").Range("AB" & r) = D1R3Abnormal.Text
+        Sheets("WorkingData").Range("AC" & r) = D1R4Abnormal.Text
+        Sheets("WorkingData").Range("AD" & r) = D1R1DiseasedDead.Text
+        Sheets("WorkingData").Range("AE" & r) = D1R2DiseasedDead.Text
+        Sheets("WorkingData").Range("AF" & r) = D1R3DiseasedDead.Text
+        Sheets("WorkingData").Range("AG" & r) = D1R4DiseasedDead.Text
+        Sheets("WorkingData").Range("AH" & r) = D1R1Dormant.Text
+        Sheets("WorkingData").Range("AI" & r) = D1R2Dormant.Text
+        Sheets("WorkingData").Range("AJ" & r) = D1R3Dormant.Text
+        Sheets("WorkingData").Range("AK" & r) = D1R4Dormant.Text
+        Sheets("WorkingData").Range("AL" & r) = D1R1Hard.Text
+        Sheets("WorkingData").Range("AM" & r) = D1R2Hard.Text
+        Sheets("WorkingData").Range("AN" & r) = D1R3Hard.Text
+        Sheets("WorkingData").Range("AO" & r) = D1R4Hard.Text
+        Sheets("WorkingData").Range("AP" & r) = D2Date.Text
+        Sheets("WorkingData").Range("AV" & r) = D2R1Normal.Text
+        Sheets("WorkingData").Range("AW" & r) = D2R2Normal.Text
+        Sheets("WorkingData").Range("AX" & r) = D2R3Normal.Text
+        Sheets("WorkingData").Range("AY" & r) = D2R4Normal.Text
+        Sheets("WorkingData").Range("AZ" & r) = D2R1Abnormal.Text
+        Sheets("WorkingData").Range("BA" & r) = D2R2Abnormal.Text
+        Sheets("WorkingData").Range("BB" & r) = D2R3Abnormal.Text
+        Sheets("WorkingData").Range("BC" & r) = D2R4Abnormal.Text
+        Sheets("WorkingData").Range("BD" & r) = D2R1DiseasedDead.Text
+        Sheets("WorkingData").Range("BE" & r) = D2R2DiseasedDead.Text
+        Sheets("WorkingData").Range("BF" & r) = D2R3DiseasedDead.Text
+        Sheets("WorkingData").Range("BG" & r) = D2R4DiseasedDead.Text
+        Sheets("WorkingData").Range("BH" & r) = D2R1Dormant.Text
+        Sheets("WorkingData").Range("BI" & r) = D2R2Dormant.Text
+        Sheets("WorkingData").Range("BJ" & r) = D2R3Dormant.Text
+        Sheets("WorkingData").Range("BK" & r) = D2R4Dormant.Text
+        Sheets("WorkingData").Range("BL" & r) = D2R1Hard.Text
+        Sheets("WorkingData").Range("BM" & r) = D2R2Hard.Text
+        Sheets("WorkingData").Range("BN" & r) = D2R3Hard.Text
+        Sheets("WorkingData").Range("BO" & r) = D2R4Hard.Text
+        Sheets("WorkingData").Range("BP" & r) = D3Date.Text
+        Sheets("WorkingData").Range("BV" & r) = D3R1Normal.Text
+        Sheets("WorkingData").Range("BW" & r) = D3R2Normal.Text
+        Sheets("WorkingData").Range("BX" & r) = D3R3Normal.Text
+        Sheets("WorkingData").Range("BY" & r) = D3R4Normal.Text
+        Sheets("WorkingData").Range("BZ" & r) = D3R1Abnormal.Text
+        Sheets("WorkingData").Range("CA" & r) = D3R2Abnormal.Text
+        Sheets("WorkingData").Range("CB" & r) = D3R3Abnormal.Text
+        Sheets("WorkingData").Range("CC" & r) = D3R4Abnormal.Text
+        Sheets("WorkingData").Range("CD" & r) = D3R1DiseasedDead.Text
+        Sheets("WorkingData").Range("CE" & r) = D3R2DiseasedDead.Text
+        Sheets("WorkingData").Range("CF" & r) = D3R3DiseasedDead.Text
+        Sheets("WorkingData").Range("CG" & r) = D3R4DiseasedDead.Text
+        Sheets("WorkingData").Range("CH" & r) = D3R1Dormant.Text
+        Sheets("WorkingData").Range("CI" & r) = D3R2Dormant.Text
+        Sheets("WorkingData").Range("CJ" & r) = D3R3Dormant.Text
+        Sheets("WorkingData").Range("CK" & r) = D3R4Dormant.Text
+        Sheets("WorkingData").Range("CL" & r) = D3R1Hard.Text
+        Sheets("WorkingData").Range("CM" & r) = D3R2Hard.Text
+        Sheets("WorkingData").Range("CN" & r) = D3R3Hard.Text
+        Sheets("WorkingData").Range("CO" & r) = D3R4Hard.Text
+        Sheets("WorkingData").Range("CP" & r) = D4Date.Text
+        Sheets("WorkingData").Range("CV" & r) = D4R1Normal.Text
+        Sheets("WorkingData").Range("CW" & r) = D4R2Normal.Text
+        Sheets("WorkingData").Range("CX" & r) = D4R3Normal.Text
+        Sheets("WorkingData").Range("CY" & r) = D4R4Normal.Text
+        Sheets("WorkingData").Range("CZ" & r) = D4R1Abnormal.Text
+        Sheets("WorkingData").Range("DA" & r) = D4R2Abnormal.Text
+        Sheets("WorkingData").Range("DB" & r) = D4R3Abnormal.Text
+        Sheets("WorkingData").Range("DC" & r) = D4R4Abnormal.Text
+        Sheets("WorkingData").Range("DD" & r) = D4R1DiseasedDead.Text
+        Sheets("WorkingData").Range("DE" & r) = D4R2DiseasedDead.Text
+        Sheets("WorkingData").Range("DF" & r) = D4R3DiseasedDead.Text
+        Sheets("WorkingData").Range("DG" & r) = D4R4DiseasedDead.Text
+        Sheets("WorkingData").Range("DH" & r) = D4R1Dormant.Text
+        Sheets("WorkingData").Range("DI" & r) = D4R2Dormant.Text
+        Sheets("WorkingData").Range("DJ" & r) = D4R3Dormant.Text
+        Sheets("WorkingData").Range("DK" & r) = D4R4Dormant.Text
+        Sheets("WorkingData").Range("DL" & r) = D4R1Hard.Text
+        Sheets("WorkingData").Range("DM" & r) = D4R2Hard.Text
+        Sheets("WorkingData").Range("DN" & r) = D4R3Hard.Text
+        Sheets("WorkingData").Range("DO" & r) = D4R4Hard.Text
+        Sheets("WorkingData").Range("DP" & r) = D5Date.Text
+        Sheets("WorkingData").Range("DV" & r) = D5R1Normal.Text
+        Sheets("WorkingData").Range("DW" & r) = D5R2Normal.Text
+        Sheets("WorkingData").Range("DX" & r) = D5R3Normal.Text
+        Sheets("WorkingData").Range("DY" & r) = D5R4Normal.Text
+        Sheets("WorkingData").Range("DZ" & r) = D5R1Abnormal.Text
+        Sheets("WorkingData").Range("EA" & r) = D5R2Abnormal.Text
+        Sheets("WorkingData").Range("EB" & r) = D5R3Abnormal.Text
+        Sheets("WorkingData").Range("EC" & r) = D5R4Abnormal.Text
+        Sheets("WorkingData").Range("ED" & r) = D5R1DiseasedDead.Text
+        Sheets("WorkingData").Range("EE" & r) = D5R2DiseasedDead.Text
+        Sheets("WorkingData").Range("EF" & r) = D5R3DiseasedDead.Text
+        Sheets("WorkingData").Range("EG" & r) = D5R4DiseasedDead.Text
+        Sheets("WorkingData").Range("EH" & r) = D5R1Dormant.Text
+        Sheets("WorkingData").Range("EI" & r) = D5R2Dormant.Text
+        Sheets("WorkingData").Range("EJ" & r) = D5R3Dormant.Text
+        Sheets("WorkingData").Range("EK" & r) = D5R4Dormant.Text
+        Sheets("WorkingData").Range("EL" & r) = D5R1Hard.Text
+        Sheets("WorkingData").Range("EM" & r) = D5R2Hard.Text
+        Sheets("WorkingData").Range("EN" & r) = D5R3Hard.Text
+        Sheets("WorkingData").Range("EO" & r) = D5R4Hard.Text
+        Sheets("WorkingData").Range("EP" & r) = D6Date.Text
+        Sheets("WorkingData").Range("EV" & r) = D6R1Normal.Text
+        Sheets("WorkingData").Range("EW" & r) = D6R2Normal.Text
+        Sheets("WorkingData").Range("EX" & r) = D6R3Normal.Text
+        Sheets("WorkingData").Range("EY" & r) = D6R4Normal.Text
+        Sheets("WorkingData").Range("EZ" & r) = D6R1Abnormal.Text
+        Sheets("WorkingData").Range("FA" & r) = D6R2Abnormal.Text
+        Sheets("WorkingData").Range("FB" & r) = D6R3Abnormal.Text
+        Sheets("WorkingData").Range("FC" & r) = D6R4Abnormal.Text
+        Sheets("WorkingData").Range("FD" & r) = D6R1DiseasedDead.Text
+        Sheets("WorkingData").Range("FE" & r) = D6R2DiseasedDead.Text
+        Sheets("WorkingData").Range("FF" & r) = D6R3DiseasedDead.Text
+        Sheets("WorkingData").Range("FG" & r) = D6R4DiseasedDead.Text
+        Sheets("WorkingData").Range("FH" & r) = D6R1Dormant.Text
+        Sheets("WorkingData").Range("FI" & r) = D6R2Dormant.Text
+        Sheets("WorkingData").Range("FJ" & r) = D6R3Dormant.Text
+        Sheets("WorkingData").Range("FK" & r) = D6R4Dormant.Text
+        Sheets("WorkingData").Range("FL" & r) = D6R1Hard.Text
+        Sheets("WorkingData").Range("FM" & r) = D6R2Hard.Text
+        Sheets("WorkingData").Range("FN" & r) = D6R3Hard.Text
+        Sheets("WorkingData").Range("FO" & r) = D6R4Hard.Text
+    
+        'Calculates Replication Count
+        RepCount = 0
+        If Sheets("WorkingData").Range("R" & r).Value > "0" Then
+            RepCount = RepCount + 1
+        End If
+        If Sheets("WorkingData").Range("S" & r).Value > "0" Then
+            RepCount = RepCount + 1
+        End If
+        If Sheets("WorkingData").Range("T" & r).Value > "0" Then
+            RepCount = RepCount + 1
+        End If
+        If Sheets("WorkingData").Range("U" & r).Value > "0" Then
+            RepCount = RepCount + 1
+        End If
+        Sheets("WorkingData").Range("FR" & r) = RepCount
+    
+    'Determine if calculated fields should be shown and refresh screen
+        TotalNormalSeed.Text = Sheets("WorkingData").Range("M" & r)
+        
+        'PercentNormalSeed field
+        If TotalSeedPlanted.Value > "0" Then
+            PercentNormalSeed.Text = Sheets("WorkingData").Range("N" & r).Value
+            Me.PercentNormalSeed.Value = Format(Me.PercentNormalSeed.Value, "0.00%")
+        Else
+            PercentNormalSeed.Text = "N/A"
+        End If
+        
+        'Duration/Day Count fields
+        If Sheets("WorkingData").Range("P" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D1DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("Q" & r) <= 0 Then
+            D1DayCount.Text = "N/A"
+        Else
+            D1DayCount.Text = Sheets("WorkingData").Range("Q" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("AP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D2DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("AQ" & r) <= 0 Then
+            D2DayCount.Text = "N/A"
+        Else
+            D2DayCount.Text = Sheets("WorkingData").Range("AQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("BP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D3DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("BQ" & r) <= 0 Then
+            D3DayCount.Text = "N/A"
+        Else
+            D3DayCount.Text = Sheets("WorkingData").Range("BQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("CP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D4DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("CQ" & r) <= 0 Then
+            D4DayCount.Text = "N/A"
+        Else
+            D4DayCount.Text = Sheets("WorkingData").Range("CQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("DP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D5DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("DQ" & r) <= 0 Then
+            D5DayCount.Text = "N/A"
+        Else
+            D5DayCount.Text = Sheets("WorkingData").Range("DQ" & r) & " days"
+        End If
+        
+        If Sheets("WorkingData").Range("EP" & r).Value = "" Or Sheets("WorkingData").Range("F" & r).Value = "" Then
+            D6DayCount.Text = "N/A"
+        ElseIf Sheets("WorkingData").Range("EQ" & r) <= 0 Then
+            D6DayCount.Text = "N/A"
+        Else
+            D6DayCount.Text = Sheets("WorkingData").Range("EQ" & r) & " days"
+        End If
+
+        'Count Total fields
+        If Sheets("WorkingData").Range("R" & r).Value > 0 Then
+            D1R1Total.Text = Sheets("WorkingData").Range("R" & r)
+        Else
+            D1R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("S" & r).Value > 0 Then
+            D1R2Total.Text = Sheets("WorkingData").Range("S" & r)
+        Else
+            D1R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("T" & r).Value > 0 Then
+            D1R3Total.Text = Sheets("WorkingData").Range("T" & r)
+        Else
+            D1R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("U" & r).Value > 0 Then
+            D1R4Total.Text = Sheets("WorkingData").Range("U" & r)
+        Else
+            D1R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AR" & r).Value > 0 Then
+            D2R1Total.Text = Sheets("WorkingData").Range("AR" & r)
+        Else
+            D2R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AS" & r).Value > 0 Then
+            D2R2Total.Text = Sheets("WorkingData").Range("AS" & r)
+        Else
+            D2R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AT" & r).Value > 0 Then
+            D2R3Total.Text = Sheets("WorkingData").Range("AT" & r)
+        Else
+            D2R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("AU" & r).Value > 0 Then
+            D2R4Total.Text = Sheets("WorkingData").Range("AU" & r)
+        Else
+            D2R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BR" & r).Value > 0 Then
+            D3R1Total.Text = Sheets("WorkingData").Range("BR" & r)
+        Else
+            D3R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BS" & r).Value > 0 Then
+            D3R2Total.Text = Sheets("WorkingData").Range("BS" & r)
+        Else
+            D3R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BT" & r).Value > 0 Then
+            D3R3Total.Text = Sheets("WorkingData").Range("BT" & r)
+        Else
+            D3R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("BU" & r).Value > 0 Then
+            D3R4Total.Text = Sheets("WorkingData").Range("BU" & r)
+        Else
+            D3R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CR" & r).Value > 0 Then
+            D4R1Total.Text = Sheets("WorkingData").Range("CR" & r)
+        Else
+            D4R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CS" & r).Value > 0 Then
+            D4R2Total.Text = Sheets("WorkingData").Range("CS" & r)
+        Else
+            D4R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CT" & r).Value > 0 Then
+            D4R3Total.Text = Sheets("WorkingData").Range("CT" & r)
+        Else
+            D4R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("CU" & r).Value > 0 Then
+            D4R4Total.Text = Sheets("WorkingData").Range("CU" & r)
+        Else
+            D4R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DR" & r).Value > 0 Then
+            D5R1Total.Text = Sheets("WorkingData").Range("DR" & r)
+        Else
+            D5R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DS" & r).Value > 0 Then
+            D5R2Total.Text = Sheets("WorkingData").Range("DS" & r)
+        Else
+            D5R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DT" & r).Value > 0 Then
+            D5R3Total.Text = Sheets("WorkingData").Range("DT" & r)
+        Else
+            D5R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("DU" & r).Value > 0 Then
+            D5R4Total.Text = Sheets("WorkingData").Range("DU" & r)
+        Else
+            D5R4Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("ER" & r).Value > 0 Then
+            D6R1Total.Text = Sheets("WorkingData").Range("ER" & r)
+        Else
+            D6R1Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("ES" & r).Value > 0 Then
+            D6R2Total.Text = Sheets("WorkingData").Range("ES" & r)
+        Else
+            D6R2Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("ET" & r).Value > 0 Then
+            D6R3Total.Text = Sheets("WorkingData").Range("ET" & r)
+        Else
+            D6R3Total.Text = ""
+        End If
+        If Sheets("WorkingData").Range("EU" & r).Value > 0 Then
+            D6R4Total.Text = Sheets("WorkingData").Range("EU" & r)
+        Else
+            D6R4Total.Text = ""
+        End If
+
+    'Makes certain export functions available to access
+    If Sheets("RESOURCEDATABASE_Export").Range("B2") = "" Then
+        Sheets("RESOURCEDATABASE_Export").Range("B2") = 1
+    End If
+    If Sheets("Technician_Export").Range("B6") = "" Then
+        Sheets("Technician_Export").Range("B6") = 1
+    End If
+
+    'Turns back off worksheets this form needed
+    Sheets("WorkingData").Visible = False
+    Sheets("RESOURCEDATABASE_Export").Visible = False
+    Sheets("Technician_Export").Visible = False
+    Sheets("ProgramStorage").Visible = False
+    Application.ScreenUpdating = True
+    
+    'Saves Workbook
+    
+        'Hide all worksheets in workbook except "Start" to make sure macros are enabled
+        Dim ws As Worksheet
+        Sheets("START").Visible = xlSheetVisible 'Make sure the "Start" worksheet is visible
+ 
+        'Hide all other worksheets
+        For Each ws In ThisWorkbook.Worksheets
+            If ws.Name <> "START" Then
+                ws.Visible = xlVeryHidden
+            End If
+        Next ws
+    
+    ActiveWorkbook.Save
+    
+    'Closes the workbook and Excel as well if only workbook open
+    If Workbooks.Count < 2 Then
+        Application.Quit
+    Else
+        ThisWorkbook.Close
+    End If
+
+End Sub
