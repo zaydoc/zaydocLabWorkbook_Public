@@ -1,0 +1,73 @@
+Private Sub ButtonYes_Click()
+
+    'Turns on worksheets that this procedure will need
+    Application.ScreenUpdating = False
+    Sheets("WorkingData").Visible = True
+    Sheets("RESOURCEDATABASE_Import").Visible = True
+    Sheets("RESOURCEDATABASE_Export").Visible = True
+    Sheets("Technician_Export").Visible = True
+    Sheets("ProgramStorage").Visible = True
+    
+    'Delete all data and refresh default format of Import_RESOURCEDATABASE worksheet
+    Sheets("RESOURCEDATABASE_Import").Unprotect
+    Sheets("RESOURCEDATABASE_Import").Cells.ClearContents
+    Sheets("ProgramStorage").Rows("5:14").Copy Sheets("RESOURCEDATABASE_Import").Rows("5:14")
+    Sheets("RESOURCEDATABASE_Import").Protect Password:="", _
+        DrawingObjects:=True, _
+        Contents:=False, _
+        Scenarios:=True, _
+        UserInterfaceOnly:=True, _
+        AllowFormattingCells:=True, _
+        AllowFormattingColumns:=True, _
+        AllowFormattingRows:=True, _
+        AllowInsertingColumns:=True, _
+        AllowInsertingRows:=True, _
+        AllowInsertingHyperlinks:=True, _
+        AllowDeletingColumns:=True, _
+        AllowDeletingRows:=True, _
+        AllowSorting:=False, _
+        AllowFiltering:=False, _
+        AllowUsingPivotTables:=False
+    
+    'Delete all data and refresh default format of WorkingData worksheet
+    Sheets("WorkingData").Cells.ClearContents
+    Sheets("ProgramStorage").Rows("19").Copy Sheets("WorkingData").Rows("1")
+    
+    'Delete all data and refresh default format of RESOURCEDATABASE_Export worksheet
+    Sheets("RESOURCEDATABASE_Export").Cells.ClearContents
+    Sheets("ProgramStorage").Rows("22").Copy Sheets("RESOURCEDATABASE_Export").Rows("1")
+
+    'Delete all data and refresh default format of Technician_Export worksheet
+    Sheets("Technician_Export").Cells.ClearContents
+    Sheets("ProgramStorage").Rows("25:29").Copy Sheets("Technician_Export").Rows("1:5")
+    
+    'Change Main Menu controls to reflect data changes
+    MainMenu.Controls("ButtonGermCards").Enabled = False
+    MainMenu.Controls("ButtonGermCards").Locked = True
+    MainMenu.Controls("ButtonImportRESOURCEDATABASE").Enabled = True
+    MainMenu.Controls("ButtonImportRESOURCEDATABASE").Locked = False
+    MainMenu.Controls("ButtonExportRESOURCEDATABASE").Enabled = False
+    MainMenu.Controls("ButtonExportRESOURCEDATABASE").Locked = True
+    MainMenu.Controls("ButtonExportTech").Enabled = False
+    MainMenu.Controls("ButtonExportTech").Locked = True
+    
+    'Turns back off worksheets this process was using
+    Sheets("WorkingData").Visible = False
+    Sheets("RESOURCEDATABASE_Export").Visible = False
+    Sheets("RESOURCEDATABASE_Import").Visible = False
+    Sheets("Technician_Export").Visible = False
+    Sheets("ProgramStorage").Visible = False
+    Application.ScreenUpdating = True
+    
+    'Open menu to alert user to process success and to ask to save
+    Unload WarningResetData
+    WarningSaveDataReset.Show
+
+End Sub
+
+Private Sub ButtonNo_Click()
+
+    'Return to Program Options
+    Unload WarningResetData
+
+End Sub
