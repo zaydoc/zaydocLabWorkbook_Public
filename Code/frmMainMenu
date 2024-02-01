@@ -1,0 +1,394 @@
+'Finding userform window information to remove close button later
+    '//Find the userform's Window
+    Private Declare Function FindWindow Lib "user32" _
+        Alias "FindWindowA" ( _
+        ByVal lpClassName As String, _
+        ByVal lpWindowName As String) As Long
+
+    '//Get the current window style
+    Private Declare Function GetWindowLong Lib "user32" _
+        Alias "GetWindowLongA" ( _
+        ByVal hWnd As Long, _
+        ByVal nIndex As Long) As Long
+
+    '//Set the new window style
+    Private Declare Function SetWindowLong Lib "user32" _
+        Alias "SetWindowLongA" ( _
+        ByVal hWnd As Long, _
+        ByVal nIndex As Long, _
+        ByVal dwNewLong As Long) As Long
+
+    Const GWL_STYLE = -16
+    Const WS_SYSMENU = &H80000
+
+Private Sub UserForm_Initialize()
+
+    'Remove Close button on form (needs code above)
+    Dim hWnd As Long, lStyle As Long
+
+    If Val(Application.Version) >= 9 Then
+        hWnd = FindWindow("ThunderDFrame", Me.Caption)
+    Else
+        hWnd = FindWindow("ThunderXFrame", Me.Caption)
+    End If
+        '//Get the current window style and turn off the Close button
+        lStyle = GetWindowLong(hWnd, GWL_STYLE)
+        SetWindowLong hWnd, GWL_STYLE, (lStyle And Not WS_SYSMENU)
+
+    'Turns on forms that main menu needs right away
+    Application.ScreenUpdating = False
+    Sheets("WorkingData").Visible = True
+    Sheets("RESOURCEDATABASE_Export").Visible = True
+    Sheets("Technician_Export").Visible = True
+    Sheets("ProgramStorage").Visible = True
+    
+    'Set labels and fonts
+    Label1.Font.Size = 9
+    Label1.Font.Bold = True
+    Label1.Font.Underline = True
+    Label2.Font.Size = 9
+    Label2.Font.Bold = True
+    Label2.Font.Underline = True
+    Label3.Font.Size = 9
+    Label3.Font.Bold = True
+    Label3.Font.Underline = True
+    
+    'Check and disable main menu buttons if there is no data for them to use
+        'Check to see if there is any data in the WorkingData worksheet
+        ActiveWorkbook.Sheets("WorkingData").Activate
+        
+        If Len(Cells(2, 1).Text) > 0 Then
+            MainMenu.Controls("ButtonCards").Enabled = True
+            MainMenu.Controls("ButtonCards").Locked = False
+            MainMenu.Controls("ButtonImportRESOURCEDATABASE").Enabled = False
+            MainMenu.Controls("ButtonImportRESOURCEDATABASE").Locked = True
+        Else
+            MainMenu.Controls("ButtonCards").Enabled = False
+            MainMenu.Controls("ButtonCards").Locked = True
+            MainMenu.Controls("ButtonImportRESOURCEDATABASE").Enabled = True
+            MainMenu.Controls("ButtonImportRESOURCEDATABASE").Locked = False
+        End If
+        
+        'Check to see if there is any data in the RESOURCEDATABASE_Export worksheet
+        ActiveWorkbook.Sheets("RESOURCEDATABASE_Export").Activate
+        
+        If Len(Cells(2, 2).Text) > 0 Then
+            MainMenu.Controls("ButtonExportRESOURCEDATABASE").Enabled = True
+            MainMenu.Controls("ButtonExportRESOURCEDATABASE").Locked = False
+        Else
+            MainMenu.Controls("ButtonExportRESOURCEDATABASE").Enabled = False
+            MainMenu.Controls("ButtonExportRESOURCEDATABASE").Locked = True
+        End If
+        
+        'Check to see if there is any data in the Technician_Export worksheet
+        ActiveWorkbook.Sheets("Technician_Export").Activate
+        
+        If Len(Cells(6, 2).Text) > 0 Then
+            MainMenu.Controls("ButtonExportTech").Enabled = True
+            MainMenu.Controls("ButtonExportTech").Locked = False
+        Else
+            MainMenu.Controls("ButtonExportTech").Enabled = False
+            MainMenu.Controls("ButtonExportTech").Locked = True
+        End If
+        
+        LabelProgramVersion.Caption = "v" & Sheets("ProgramStorage").Range("C33")
+        
+        'Turns back off forms main menu was using
+        Sheets("WorkingData").Visible = False
+        Sheets("RESOURCEDATABASE_Export").Visible = False
+        Sheets("Technician_Export").Visible = False
+        Sheets("ProgramStorage").Visible = False
+        Application.ScreenUpdating = True
+        
+        ActiveWorkbook.Sheets("FormBG").Activate
+
+End Sub
+
+Private Sub ButtonCloseWorkbook_Click()
+
+    'Hide all worksheets in workbook except "Start" to make sure macros are enabled
+    Dim ws As Worksheet
+    Sheets("START").Visible = True 'Make sure the "Start" worksheet is visible
+ 
+    'Hide all other worksheets
+    For Each ws In ThisWorkbook.Worksheets
+        If ws.Name <> "START" Then
+            ws.Visible = xlVeryHidden
+        End If
+    Next ws
+    
+    'Disable the main menu to allow all excel apps to close properly
+    Unload MainMenu
+    
+    'Closes the workbook and Excel as well if only workbook open
+    If Workbooks.Count < 2 Then
+        Application.Quit
+    Else
+        ThisWorkbook.Close
+    End If
+
+End Sub
+
+Private Sub ButtonCards_Click()
+
+    Unload MainMenu
+    Card.Show
+
+End Sub
+
+
+Private Sub ButtonImportRESOURCEDATABASE_Click()
+
+    'Turns on RESOURCEDATABASE_Import form and deactivates FormBG
+    Application.ScreenUpdating = False
+    Sheets("RESOURCEDATABASE_Import").Visible = True
+    Sheets("FormBG").Visible = False
+    Application.ScreenUpdating = True
+    
+    'Activates and focuses on RESOURCEDATABASE_Import worksheet
+    ActiveWorkbook.Sheets("RESOURCEDATABASE_Import").Activate
+    Cells(15, 1).Select
+    Unload MainMenu
+
+End Sub
+
+Private Sub ButtonExportRESOURCEDATABASE_Click()
+
+    'Displays Save As dialog and saves the RESOURCEDATABASE report worksheet as a separate workbook
+    Dim filename As Variant
+    Dim ordernumber As String
+    Dim cropname As String
+    Dim LastRowCopyData As Long
+    Dim wb As Workbook
+    
+    'Turning on worksheets for function to process
+    Application.ScreenUpdating = False
+    Sheets("WorkingData").Visible = True
+    Sheets("ProgramStorage").Visible = True
+    Sheets("RESOURCEDATABASE_Import").Visible = True
+    Sheets("RESOURCEDATABASE_Export").Visible = True
+    
+    ordernumber = Range("RESOURCEDATABASE_Import!B15")
+    cropname = Range("RESOURCEDATABASE_Import!E5")
+    LastRowCopyData = Sheets("ProgramStorage").Range("C35")
+    
+    'Saves WorkingData's full data to RESOURCEDATABASE_Export as required for the report
+        
+        'Delete all data in RESOURCEDATABASE_Export worksheet if any exists
+        Sheets("RESOURCEDATABASE_Export").Cells.ClearContents
+        Sheets("ProgramStorage").Rows("22").Copy Sheets("RESOURCEDATABASE_Export").Rows("1")
+        'P.I. field copy
+        Sheets("WorkingData").Range("B2:B" & LastRowCopyData).Copy
+        Sheets("RESOURCEDATABASE_Export").Range("B2").PasteSpecial xlPasteValues
+        'Taxon field copy
+        Sheets("WorkingData").Range("D2:D" & LastRowCopyData).Copy
+        Sheets("RESOURCEDATABASE_Export").Range("C2").PasteSpecial xlPasteValues
+        'Test Date Format field copy
+        Sheets("WorkingData").Range("FP2:FP" & LastRowCopyData).Copy
+        Sheets("RESOURCEDATABASE_Export").Range("D2").PasteSpecial xlPasteValues
+        'Tested Date/Completed Date field copy
+        Sheets("WorkingData").Range("G2:G" & LastRowCopyData).Copy
+        Sheets("RESOURCEDATABASE_Export").Range("E2").PasteSpecial xlPasteValues
+        'NORMAL/Total Normal Seed field copy
+        Sheets("WorkingData").Range("M2:M" & LastRowCopyData).Copy
+        Sheets("RESOURCEDATABASE_Export").Range("F2").PasteSpecial xlPasteValues
+        'ABNORMAL/Total Abnormal Seed field copy
+        Sheets("WorkingData").Range("FT2:FT" & LastRowCopyData).Copy
+        Sheets("RESOURCEDATABASE_Export").Range("G2").PasteSpecial xlPasteValues
+        'DORM/Total Dormant Seed field copy
+        Sheets("WorkingData").Range("FU2:FU" & LastRowCopyData).Copy
+        Sheets("RESOURCEDATABASE_Export").Range("H2").PasteSpecial xlPasteValues
+        'HARD/Total Hard Seed field copy
+        Sheets("WorkingData").Range("FV2:FV" & LastRowCopyData).Copy
+        Sheets("RESOURCEDATABASE_Export").Range("I2").PasteSpecial xlPasteValues
+        'Sample Count/Total Seed Planted field copy
+        Sheets("WorkingData").Range("L2:L" & LastRowCopyData).Copy
+        Sheets("RESOURCEDATABASE_Export").Range("J2").PasteSpecial xlPasteValues
+        'Replication Count field copy
+        Sheets("WorkingData").Range("FR2:FR" & LastRowCopyData).Copy
+        Sheets("RESOURCEDATABASE_Export").Range("K2").PasteSpecial xlPasteValues
+        'Note/Comments field copy
+        Sheets("WorkingData").Range("O2:O" & LastRowCopyData).Copy
+        Sheets("RESOURCEDATABASE_Export").Range("L2").PasteSpecial xlPasteValues
+        'Plants Returned field copy
+        Sheets("WorkingData").Range("FS2:FS" & LastRowCopyData).Copy
+        Sheets("RESOURCEDATABASE_Export").Range("M2").PasteSpecial xlPasteValues
+        'Inventory Viability Rule field copy
+        Sheets("WorkingData").Range("FW2:FW" & LastRowCopyData).Copy
+        Sheets("RESOURCEDATABASE_Export").Range("N2").PasteSpecial xlPasteValues
+        
+        'Percent Normal field generation
+        r = 2
+        Do While r <= LastRowCopyData
+            Sheets("RESOURCEDATABASE_Export").Range("O" & r) = "=ROUND(F" & r & "/J" & r & "*100,0)"
+            r = r + 1
+        Loop
+        'Percent Abnormal field generation
+        r = 2
+        Do While r <= LastRowCopyData
+            Sheets("RESOURCEDATABASE_Export").Range("P" & r) = "=ROUND(G" & r & "/J" & r & "*100,0)"
+            r = r + 1
+        Loop
+        'Percent Dormant field generation
+        r = 2
+        Do While r <= LastRowCopyData
+            Sheets("RESOURCEDATABASE_Export").Range("Q" & r) = "=ROUND(H" & r & "/J" & r & "*100,0)"
+            r = r + 1
+        Loop
+        'Percent Hard field generation
+        r = 2
+        Do While r <= LastRowCopyData
+            Sheets("RESOURCEDATABASE_Export").Range("R" & r) = "=ROUND(I" & r & "/J" & r & "*100,0)"
+            r = r + 1
+        Loop
+        'Percent Viable field generation
+        r = 2
+        Do While r <= LastRowCopyData
+            Sheets("RESOURCEDATABASE_Export").Range("S" & r) = "=SUM(O" & r & "+Q" & r & "+R" & r & ")"
+            r = r + 1
+        Loop
+        
+        'Set first cell as active cell for user's convenience
+        ActiveWorkbook.Sheets("RESOURCEDATABASE_Export").Activate
+        Sheets("RESOURCEDATABASE_Export").Range("A1").Select
+        ActiveWorkbook.Sheets("FormBG").Activate
+        Application.ScreenUpdating = True
+    
+    'Checking to see if there is no optional crop name in RESOURCEDATABASE_Import
+    If Len(Sheets("RESOURCEDATABASE_Import").Cells(5, 5).Text) = 0 Then
+        Set wb = Workbooks.Add
+        ThisWorkbook.Sheets("RESOURCEDATABASE_Export").Copy Before:=wb.Sheets(1)
+        filename = Application.GetSaveAsFilename( _
+            fileFilter:="Excel Files (*.xlsx), *.xlsx", _
+        InitialFileName:="CardReport_" & ordernumber & ".xlsx")
+        
+        'Check to see if user closed save dialog to prevent a false.xlsx file
+        If filename = False Then
+            Application.DisplayAlerts = False
+            ActiveWorkbook.Close
+            Application.DisplayAlerts = True
+        Else
+            wb.SaveAs filename
+            ActiveWorkbook.Close
+        End If
+        
+    'Checking to see if there is an optional crop name in RESOURCEDATABASE_Import
+    ElseIf Len(Sheets("RESOURCEDATABASE_Import").Cells(5, 5).Text) > 0 Then
+        Set wb = Workbooks.Add
+        ThisWorkbook.Sheets("RESOURCEDATABASE_Export").Copy Before:=wb.Sheets(1)
+        filename = Application.GetSaveAsFilename( _
+            fileFilter:="Excel Files (*.xlsx), *.xlsx", _
+        InitialFileName:="CardReport_" & ordernumber & "_" & cropname & ".xlsx")
+        
+        'Check to see if user closed save dialog to prevent a false.xlsx file
+        If filename = False Then
+            Application.DisplayAlerts = False
+            ActiveWorkbook.Close
+            Application.DisplayAlerts = True
+        Else
+            wb.SaveAs filename
+            ActiveWorkbook.Close
+        End If
+        
+    Else
+        MsgBox "Error: Could not export the report. Please restart this program and try again."
+    End If
+
+    'Turning off worksheets for function to process
+    Sheets("WorkingData").Visible = False
+    Sheets("ProgramStorage").Visible = False
+    Sheets("RESOURCEDATABASE_Import").Visible = False
+    Sheets("RESOURCEDATABASE_Export").Visible = False
+
+End Sub
+
+Private Sub ButtonExportTech_Click()
+
+    'Displays Save As dialog and saves the Technician's report worksheet as a separate workbook
+    Dim filename As Variant
+    Dim ordernumber As String
+    Dim datecompleted As String
+    Dim LastRowCopyData As Long
+    Dim wb As Workbook
+    
+    'Turning on worksheets for function to process
+    Application.ScreenUpdating = False
+    Sheets("WorkingData").Visible = True
+    Sheets("ProgramStorage").Visible = True
+    Sheets("Technician_Export").Visible = True
+    
+    LastRowCopyData = Sheets("ProgramStorage").Range("C35")
+    
+    'Saves WorkingData's full data to Technician_Export as required for the report
+
+        'Delete all data in Technician_Export worksheet if any exists
+        Sheets("Technician_Export").Cells.ClearContents
+        Sheets("ProgramStorage").Rows("25:29").Copy Sheets("Technician_Export").Rows("1:5")
+        'Order number field copy
+        Sheets("WorkingData").Range("H2").Copy
+        Sheets("Technician_Export").Range("C1").PasteSpecial xlPasteValues
+        'Date full order was completed field
+        Sheets("Technician_Export").Range("C2") = "=MAX(C6:C60000)"
+        'Total items in order field
+        LastRowCopyData = LastRowCopyData - 1 'compensating for variable being one off from true order items number
+        Sheets("Technician_Export").Range("C3") = LastRowCopyData
+        LastRowCopyData = LastRowCopyData + 1
+        'Accession field copy
+        Sheets("WorkingData").Range("FQ2:FQ" & LastRowCopyData).Copy
+        Sheets("Technician_Export").Range("A6").PasteSpecial xlPasteValues
+        'P.I. field copy
+        Sheets("WorkingData").Range("B2:B" & LastRowCopyData).Copy
+        Sheets("Technician_Export").Range("B6").PasteSpecial xlPasteValues
+        'Taxon field copy
+        Sheets("WorkingData").Range("D2:D" & LastRowCopyData).Copy
+        Sheets("Technician_Export").Range("C6").PasteSpecial xlPasteValues
+        'Date completed field copy
+        Sheets("WorkingData").Range("G2:G" & LastRowCopyData).Copy
+        Sheets("Technician_Export").Range("D6").PasteSpecial xlPasteValues
+        'Total Normal Seed field copy
+        Sheets("WorkingData").Range("M2:M" & LastRowCopyData).Copy
+        Sheets("Technician_Export").Range("E6").PasteSpecial xlPasteValues
+        'Set first cell as active cell for user's convenience
+        ActiveWorkbook.Sheets("Technician_Export").Activate
+        Sheets("Technician_Export").Range("A1").Select
+        ActiveWorkbook.Sheets("FormBG").Activate
+    
+    ordernumber = Sheets("Technician_Export").Range("C1")
+    datecompleted = Sheets("Technician_Export").Range("C2")
+    
+    Application.ScreenUpdating = True
+    
+    Set wb = Workbooks.Add
+    ThisWorkbook.Sheets("Technician_Export").Copy Before:=wb.Sheets(1)
+    filename = Application.GetSaveAsFilename( _
+        fileFilter:="Excel Files (*.xlsx), *.xlsx", _
+    InitialFileName:="CardReport_" & DatePart("yyyy", datecompleted) & "-" & DatePart("m", datecompleted) & "-" & DatePart("d", datecompleted) & "_" & ordernumber & ".xlsx")
+    
+    'Check to see if user closed save dialog to prevent a false.xlsx file
+        If filename = False Then
+            Application.DisplayAlerts = False
+            ActiveWorkbook.Close
+            Application.DisplayAlerts = True
+        Else
+            wb.SaveAs filename
+            ActiveWorkbook.Close
+        End If
+
+    'Turning worksheet back off
+    Sheets("WorkingData").Visible = False
+    Sheets("ProgramStorage").Visible = False
+    Sheets("Technician_Export").Visible = False
+
+End Sub
+
+Private Sub ButtonAboutProgram_Click()
+
+    AboutWorkbook.Show
+
+End Sub
+
+Private Sub ButtonOptions_Click()
+
+    ProgramOptions.Show
+
+End Sub
