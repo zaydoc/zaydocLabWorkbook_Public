@@ -1,0 +1,20 @@
+Private Sub UserForm_Initialize()
+
+    'Turn worksheets on that this form needs
+    Application.ScreenUpdating = False
+    Sheets("ProgramStorage").Visible = True
+    
+    'Load Caption data into the form
+    LabelProgramVersion.Caption = "Version " & Sheets("ProgramStorage").Range("C33")
+
+    'Turn back off worksheets that this form used
+    Sheets("ProgramStorage").Visible = False
+    Application.ScreenUpdating = True
+
+End Sub
+
+Private Sub ButtonOkay_Click()
+
+    Unload AboutWorkbook
+
+End Sub
