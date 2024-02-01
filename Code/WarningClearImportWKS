@@ -1,0 +1,43 @@
+Private Sub CommandButton1_Click()
+
+    'Turning on worksheets for function to process
+    Application.ScreenUpdating = False
+    Sheets("ProgramStorage").Visible = True
+    
+    'Clear worksheet of data and refresh it with backup
+    Sheets("RESOURCEDATABASE_Import").Unprotect
+    Sheets("RESOURCEDATABASE_Import").Cells.ClearContents
+    Sheets("ProgramStorage").Rows("5:14").Copy Sheets("RESOURCEDATABASE_Import").Rows("5:14")
+    Sheets("RESOURCEDATABASE_Import").Protect Password:="", _
+        DrawingObjects:=True, _
+        Contents:=False, _
+        Scenarios:=True, _
+        UserInterfaceOnly:=True, _
+        AllowFormattingCells:=True, _
+        AllowFormattingColumns:=True, _
+        AllowFormattingRows:=True, _
+        AllowInsertingColumns:=True, _
+        AllowInsertingRows:=True, _
+        AllowInsertingHyperlinks:=True, _
+        AllowDeletingColumns:=True, _
+        AllowDeletingRows:=True, _
+        AllowSorting:=False, _
+        AllowFiltering:=False, _
+        AllowUsingPivotTables:=False
+    
+    Unload WarningClearImportWKS
+    Cells(15, 1).Select
+    
+    'Turning on worksheets for function to process
+    Sheets("ProgramStorage").Visible = False
+    Application.ScreenUpdating = True
+
+End Sub
+
+Private Sub CommandButton2_Click()
+
+    'Unloads pop-up dialog box and returns to RESOURCEDATABASE_Import worksheet
+    Unload WarningClearImportWKS
+    Cells(15, 1).Select
+
+End Sub
