@@ -7,7 +7,7 @@ Private Sub ButtonYes_Click()
     Sheets("RESOURCEDATABASE_Export").Visible = True
     Sheets("Technician_Export").Visible = True
     Sheets("ProgramStorage").Visible = True
-    
+
     'Delete all data and refresh default format of Import_RESOURCEDATABASE worksheet
     Sheets("RESOURCEDATABASE_Import").Unprotect
     Sheets("RESOURCEDATABASE_Import").Cells.ClearContents
