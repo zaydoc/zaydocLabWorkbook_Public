@@ -1,0 +1,63 @@
+Private Sub UserForm_Initialize()
+
+    'Turn worksheets on that this form needs
+    Application.ScreenUpdating = False
+    Sheets("ProgramStorage").Visible = True
+    
+    'Set labels and fonts
+    Label1.Font.Size = 9
+    Label1.Font.Bold = True
+    Label1.Font.Underline = True
+    Label2.Font.Size = 9
+    Label2.Font.Bold = True
+    Label2.Font.Underline = True
+    
+    'Check form's current settings of options and load them into form
+        'Repetition Days Tab Style
+        If Sheets("ProgramStorage").Range("C34") = 1 Then
+            OptionRepTabs = True
+        ElseIf Sheets("ProgramStorage").Range("C34") = 2 Then
+            OptionRepButtons = True
+        End If
+        
+    'Turn back off worksheets that this form used
+    Sheets("ProgramStorage").Visible = False
+    Application.ScreenUpdating = True
+
+End Sub
+
+Private Sub ButtonResetData_Click()
+
+    WarningResetData.Show
+
+End Sub
+
+Private Sub ButtonOK_Click()
+
+    'Turn worksheets on that this form needs
+    Application.ScreenUpdating = False
+    Sheets("ProgramStorage").Visible = True
+    
+    'Check current settings of options in form and save them into ProgramStorage worksheet
+        'Repetition Days Tab Style
+        If OptionRepTabs.Value = True Then
+            Sheets("ProgramStorage").Range("C34") = 1
+        ElseIf OptionRepButtons.Value = True Then
+            Sheets("ProgramStorage").Range("C34") = 2
+        End If
+
+    'Turn back off worksheets that this form used
+    Sheets("ProgramStorage").Visible = False
+    Application.ScreenUpdating = True
+
+    'Return to Main Menu
+    Unload ProgramOptions
+
+End Sub
+
+Private Sub ButtonCancel_Click()
+
+    'Return to Main Menu
+    Unload ProgramOptions
+
+End Sub
